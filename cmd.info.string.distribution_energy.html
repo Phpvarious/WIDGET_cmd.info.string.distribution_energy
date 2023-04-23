@@ -1,0 +1,1224 @@
+<div class="cmd #history# tooltips cmd-widget" data-type="info" data-subtype="string" data-cmd_id="#id#" data-cmd_uid="#uid#" data-version="#version#" data-eqLogic_id="#eqLogic_id#" style="width: 100%;">
+  
+  <!-- Widget name : cmd.info.string.distribution_energy
+    Auteur        : Phpvarious
+    Version actuelle : 23/04/2023 v1
+    Lien          : https://phpvarious.github.io/documentation/widget/fr_FR/widget_scenario/distribution_energie/
+  -->
+  <template>
+    <div> ------------ Grid -------------</div>
+    <div>Grid : ID de l'équipement réseau</div>
+    <div>-- GridInverted : Inverse les valeurs de l'équipement Grid [1: inversé | 0: défaut]</div>
+    <div>GridProduction :  ID de l'équipement réseau (vers réseau edf)</div>
+    <div>GridConsumption : ID de l'équipement réseau (depuis réseau edf)</div>
+    
+    <div> ------------ Solar ------------</div>
+    <div>Solar : ID de l'équipement Solaire</div>
+    <div>-- SolarInverted : Inverse les valeurs de l'équipement Solar [1: inversé | 0: défaut]</div>
+    <div> ----------- Battery ------------</div>
+    <div>Battery : ID de l'équipement Battery</div>
+    <div>-- BatteryInverted : Inverse les valeurs de l'équipement Battery [1: inversé | 0: défaut]</div>
+    <div>BatteryProduction : ID de l'équipement battery (Entrée batterie)</div>
+    <div>BatteryConsumption :  ID de l'équipement battery (Sortie batterie)</div>
+    <div>BatteryState : ID de l'équipement pour l'état de charge de la batterie (%)</div>
+    <div> ------------ Gas --------------</div>
+    <div>Gas : ID de l'équipement Gaz</div>
+    <div>GazUnit: Unité de la valeur [ défaut : m³]</div>
+    <div> ----------- Water -------------</div>
+    <div>Water : ID de l'équipement Water</div>
+    <div>WaterUnit: Unité de la valeur [ défaut : m³]</div>
+    <div> ------------ CSS --------------</div>
+    <div>Background : Couleur arrière plan du widget [ Exemple : #fffff, white, linear-gradient... | Défaut : transparent ]</div>
+    <div>BorderRadius : Taille de l'arrondi du widget [ Exemple : 10, 20 ... (Défaut : 12) ]</div>
+    <div>BorderWidth : Taille de la bordure du widget [ Exemple : 1, 2 ... (Défaut : 0) ]</div>
+    <div>BorderColor : Couleur de la bordure du widget [ Exemple : #fffff, white]</div>
+    <div>DefautColor : Couleur par défaut du texte et icones [ Exemple : #fffff, white]</div>
+    <div>LabelColor : Couleur des titres [ Exemple : #fffff, white]</div>
+    <div>GasColor : Couleur des éléments de catégorie gaz [ Exemple : #fffff, white]</div>
+    <div>SolarColor : Couleur des éléments de catégorie solaire [ Exemple : #fffff, white]</div>
+    <div>GridConsumptionColor : Couleur des éléments de catégorie réseau [ Exemple : #fffff, white]</div>
+    <div>GridReturnColor : Couleur des lignes pour le retour au réseau [ Exemple : #fffff, white]</div>
+    <div>WaterColor : Couleur des éléments de catégorie eau [ Exemple : #fffff, white]</div>
+    <div>BatteryOutColor : Couleur de la ligne pour la sortie de la batterie [ Exemple : #fffff, white]</div>
+    <div>BatteryInColor : Couleur des éléments de catégorie Batterie [ Exemple : #fffff, white]</div>
+  </template>
+  
+  <div class="widget#id#" id=""></div>
+  
+  <script>
+    var debug#id# = ('#debug#' == 1) ? true : false;
+    var fullJs#id# = false
+    var jeedomVersion#id# = 4.4
+    if (debug#id#) console.log('┌─────────────────── Widget Info du jour [#id#] Compatibilité V4.2 V4.3 V4.4 ───────────────')
+    /* Compatibilité V4.2 V4.3 V4.4 */
+    /**/ if(typeof jeeFrontEnd === 'undefined') {
+    /**/   if (debug#id#) console.log('| jeeFrontEnd no exist -> version <= 4.2')
+    /**/   jeedomVersion#id# = 4.2
+    /**/ }
+    /**/ else
+    /**/ {
+    /**/   jeedomVersion#id# = jeeFrontEnd.jeedomVersion.substr(0, 3)
+    /**/   if (debug#id#) console.log('| jeeFrontEnd -> version == ' + jeedomVersion#id#)
+    /**/ }
+    /**/ if (jeedomVersion#id# >= 4.4) {
+    /**/   fullJs#id# = true
+    /**/   if (debug#id#) console.log('| Full Js')
+    /**/ }
+    /**/ if (typeof jeedom.cmd.addUpdateFunction !== 'function') { // a partir de la 4.3
+    /**/   if (debug#id#) console.log('| jeedom.cmd.addUpdateFunction no exist')
+    /**/   jeedom.cmd.addUpdateFunction = function(id,func) { jeedom.cmd.update[id]=func; }
+    /**/ }
+    /* ------------------------------------------ */
+    
+    var gasUnit#id# = "m³"
+    var waterUnit#id# = "m³"
+    
+    if ('#DefautColor#' != '#'+'DefautColor#') document.documentElement.style.setProperty('--primary-text-color#id#', '#DefautColor#') // icones + texte
+    if ('#LabelColor#' != '#'+'LabelColor#') document.documentElement.style.setProperty('--secondary-text-color#id#', '#LabelColor#') // lebel
+    if ('#GasColor#' != '#'+'GasColor#') document.documentElement.style.setProperty('--gas-color#id#', '#GasColor#')
+    if ('#SolarColor#' != '#'+'SolarColor#') document.documentElement.style.setProperty('--solar-color#id#', '#SolarColor#')
+    if ('#GridConsumptionColor#' != '#'+'GridConsumptionColor#') document.documentElement.style.setProperty('--grid-consumption-color#id#', '#GridConsumptionColor#')
+    if ('#GridReturnColor#' != '#'+'GridReturnColor#') document.documentElement.style.setProperty('--grid-return-color#id#', '#GridReturnColor#')
+    if ('#WaterColor#' != '#'+'WaterColor#') document.documentElement.style.setProperty('--water-color#id#', '#WaterColor#')
+    if ('#BatteryOutColor#' != '#'+'BatteryOutColor#') document.documentElement.style.setProperty('--battery-out-color#id#', '#BatteryOutColor#')
+    if ('#BatteryInColor#' != '#'+'BatteryInColor#') document.documentElement.style.setProperty('--battery-in-color#id#', '#BatteryInColor#')
+    if ('#Background#' != '#'+'Background#') document.documentElement.style.setProperty('--background#id#', '#Background#')
+    if ('#BorderRadius#' != '#'+'BorderRadius#') document.documentElement.style.setProperty('--border-radius#id#', '#BorderRadius#px')
+    if ('#BorderWidth#' != '#'+'BorderWidth#') document.documentElement.style.setProperty('--border-width#id#', '#BorderWidth#px')
+    if ('#BorderColor#' != '#'+'BorderColor#') document.documentElement.style.setProperty('--border-color#id#', '#BorderColor#')
+    if ('#GazUnit#' != '#'+'GazUnit#') gasUnit#id# = '#GazUnit#'
+    if ('#WaterUnit#' != '#'+'WaterUnit#') waterUnit#id# = '#WaterUnit#'
+   
+    
+    var MAX_FLOW_RATE#id# = 6; //3
+    var MIN_FLOW_RATE#id# = 0.75; //10
+    var RadiusCircle = 38
+    var CIRCLE_CIRCUMFERENCE = 2 * Math.PI * RadiusCircle
+    var energieUnit#id# = 'kWh'
+    var kw_decimals#id# = 1
+    
+    function circleRate(value, total){
+      return MAX_FLOW_RATE#id# - (value / total) * (MAX_FLOW_RATE#id# - MIN_FLOW_RATE#id#);
+    };
+    
+    function displayValue#id#(value){
+      if (value === null) return "0";
+      //let isKW = value > 1000;
+      let v = value.toFixed(1)
+      return v + ' ' + energieUnit#id#;
+    }
+    function formatNumber#id#(value, digits=1){
+      if (value === null) return "0";
+      let v = value.toFixed(digits)
+      return v
+    }
+    
+    if (debug#id#) console.log('└──────────────────────────────────────────────────────')
+    
+    
+    jeedom.cmd.addUpdateFunction('#id#', function(_options) {
+      if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]'))) {
+        if (debug#id#) console.log('┌─────────────────── Widget Distribution energy [#id#] en debug ───────────────')
+      
+        if (debug#id#) console.log('| ┌────────────────────── Param Grid ────────────────────')
+        var hasGrid = false;
+        var eqLogic_grid = false // si valeur le calcul sera fait en fonction de celle-ci
+        var eqLogic_grid_production = false // vers le réseau
+        var eqLogic_grid_consumption = 0 // depuis le réseau
+        var eqLogic_grid_Inverted = false
+        var hasReturnToGrid = false
+        
+        if('#Grid#' != '#'+'Grid#'){
+          jeedom.cmd.execute({
+            id : '#Grid#',
+            async: false,
+            noCache: true,
+            error: function(error) {
+              if (debug#id#) console.log('| | ERREUR !!!')
+              hasGrid = false
+            },
+            success: function (cmdInfo) {
+              if (typeof cmdInfo === "number") {
+                if (debug#id#) console.log('| | eqLogic_grid  = ' + cmdInfo)
+                eqLogic_grid = cmdInfo
+                hasGrid = true
+                if('#GridInverted#' != '#'+'GridInverted#' && '#GridInverted#' == 1){
+                  eqLogic_grid_Inverted = true
+                  if (debug#id#) console.log('| | grid_Inverted -> true')
+                }
+              }
+            }
+          })
+        }
+        else
+        {
+          if('#GridConsumption#' != '#'+'GridConsumption#'){
+            jeedom.cmd.execute({
+              id : '#GridConsumption#',
+              async: false,
+              noCache: true,
+              error: function(error) {
+                if (debug#id#) console.log('| | ERREUR !!!')
+              },
+              success: function (cmdInfo) {
+                if (typeof cmdInfo === "number") {
+                  if (debug#id#) console.log('| | eqLogic_grid_consumption  = ' + cmdInfo)
+                   hasGrid = true
+                   eqLogic_grid_consumption = cmdInfo
+                }
+              }
+            })
+          }
+          if (hasGrid){
+            if ('#GridProduction#' != '#'+'GridProduction#'){
+              jeedom.cmd.execute({
+                id : '#GridProduction#',
+                async: false,
+                noCache: true,
+                error: function(error) {
+                  if (debug#id#) console.log('| | ERREUR !!!')
+                },
+                success: function (cmdInfo) {
+                  if (typeof cmdInfo === "number") {
+                    if (debug#id#) console.log('| | eqLogic_grid_production  = ' + cmdInfo)
+                    eqLogic_grid_production = cmdInfo
+                    hasReturnToGrid = true
+                  }
+                }
+              })
+            }
+          }
+        }
+        if (debug#id#) console.log('| └──────────────────────────────────────────────────────')
+      
+        if (debug#id#) console.log('| ┌────────────────────── Param SOLAR ───────────────────')
+        var hasSolarProduction = false
+        var eqLogic_totalSolarProduction = 0
+        var eqLogic_solar_Inverted = false
+      
+        if('#Solar#' != '#'+'Solar#'){
+          jeedom.cmd.execute({
+            id : '#Solar#',
+            async: false,
+            noCache: true,
+            error: function(error) {
+              if (debug#id#) console.log('| | ERREUR !!!')
+            },
+            success: function (cmdInfo) {
+              if (typeof cmdInfo === "number") {
+                eqLogic_totalSolarProduction = cmdInfo
+                hasSolarProduction = true
+                if (debug#id#) console.log('| | eqLogic_totalSolarProduction = ' + eqLogic_totalSolarProduction)
+                if('#SolarInverted#' != '#'+'SolarInverted#' && '#SolarInverted#' == 1){
+                  eqLogic_solar_Inverted = true
+                  if (debug#id#) console.log('| | eqLogic_solar_Inverted -> true')
+                }
+              }
+            }
+          })
+        }
+        if (debug#id#) console.log('| └──────────────────────────────────────────────────────')
+      
+        if (debug#id#) console.log('| ┌───────────────────── Param BATTERY ──────────────────')
+        var hasBattery = false;
+        var eqLogic_battery = false // si valeur le calcul sera fait en fonction de celle-ci
+        var eqLogic_battery_charge = null
+        var eqLogic_batteryProduction = false
+        var eqLogic_batteryConsumption = false
+        var eqLogic_battery_Inverted = false
+        
+        if('#Battery#' != '#'+'Battery#'){
+          jeedom.cmd.execute({
+            id : '#Battery#',
+            async: false,
+            noCache: true,
+            error: function(error) {
+              if (debug#id#) console.log('| | ERREUR !!!')
+            },
+            success: function (cmdInfo) {
+              if (typeof cmdInfo === "number") {
+                if (debug#id#) console.log('| | eqLogic_battery = ' + cmdInfo)
+                eqLogic_battery = cmdInfo
+                hasBattery = true
+                if('#BatteryInverted#' != '#'+'BatteryInverted#' && '#BatteryInverted#' == 1){
+                  eqLogic_battery_Inverted = true
+                  if (debug#id#) console.log('| | eqLogic_battery_Inverted -> true')
+                }
+              }
+            }
+          })
+        }
+        else if('#BatteryConsumption#' != '#'+'BatteryConsumption#' && '#BatteryProduction#' != '#'+'BatteryProduction#'){
+          jeedom.cmd.execute({
+            id : '#BatteryConsumption#',
+            async: false,
+            noCache: true,
+            error: function(error) {
+              if (debug#id#) console.log('| | ERREUR !!!')
+            },
+            success: function (cmdInfo) {
+              if (typeof cmdInfo === "number") {
+                eqLogic_batteryConsumption = cmdInfo
+                jeedom.cmd.execute({
+                  id : '#BatteryProduction#',
+                  async: false,
+                  noCache: true,
+                  error: function(error) {
+                    if (debug#id#) console.log('| | ERREUR !!!')
+                  },
+                  success: function (cmdInfo2) {
+                    if (typeof cmdInfo2 === "number") {
+                      eqLogic_batteryProduction = cmdInfo2
+                      if (debug#id#) console.log('| | eqLogic_batteryProduction = ' + eqLogic_batteryProduction)
+                      if (debug#id#) console.log('| | eqLogic_batteryConsumption = ' + eqLogic_batteryConsumption)
+                      hasBattery = true
+                    }
+                  }
+                })
+              }
+            }
+          })
+        }
+        if(hasBattery){
+          if('#BatteryState#' != '#'+'BatteryState#'){
+            jeedom.cmd.execute({
+              id : '#BatteryState#',
+              async: false,
+              noCache: true,
+              error: function(error) {
+                if (debug#id#) console.log('| | ERREUR !!!')
+              },
+              success: function (cmdInfo) {
+                if (typeof cmdInfo === "number") {
+                  eqLogic_battery_charge = cmdInfo
+                  if (debug#id#) console.log('| | eqLogic_battery_charge = ' + cmdInfo)
+                }
+              }
+            })
+          }
+        }
+        if (debug#id#) console.log('| └──────────────────────────────────────────────────────')
+      
+        if (debug#id#) console.log('| ┌─────────────────────── Param GAS ────────────────────')
+        var hasGas = false
+        var gasState = 0;
+        var gas_Inverted = false
+        
+        if('#Gas#' != '#'+'Gas#'){
+          jeedom.cmd.execute({
+            id : '#Gas#',
+            async: false,
+            noCache: true,
+            error: function(error) {
+              if (debug#id#) console.log('| | ERREUR !!!')
+            },
+            success: function (cmdInfo) {
+              if (typeof cmdInfo === "number") {
+                if (debug#id#) console.log('| | gasState = ' + cmdInfo)
+                gasState = cmdInfo
+                hasGas = true
+                if('#GasInverted#' != '#'+'GasInverted#' && '#GasInverted#' == 1){
+                  gas_Inverted = true
+                  if (debug#id#) console.log('| | gas_Inverted -> true')
+                }
+              }
+            }
+          })
+        }
+        if (debug#id#) console.log('| └──────────────────────────────────────────────────────')
+      
+        if (debug#id#) console.log('| ┌────────────────────── Param WATER ───────────────────')
+        var hasWater = false
+        var waterState = 0
+        var water_Inverted = false
+        
+        if('#Water#' != '#'+'Water#'){
+          jeedom.cmd.execute({
+            id : '#Water#',
+            async: false,
+            noCache: true,
+            error: function(error) {
+              if (debug#id#) console.log('| | ERREUR !!!')
+            },
+            success: function (cmdInfo) {
+              if (typeof cmdInfo === "number") {
+                hasWater = true
+                waterState = cmdInfo
+                if (debug#id#) console.log('| | waterState = ' + waterState)
+                if('#WaterInverted#' != '#'+'WaterInverted#' && '#WaterInverted#' == 1){
+                  water_Inverted = true
+                  if (debug#id#) console.log('| | water_Inverted -> true')
+                }
+              }
+            }
+          })
+        }
+        if (debug#id#) console.log('| └──────────────────────────────────────────────────────')
+        
+        if (debug#id#) console.log('| ┌──────────────────────── VALUES ──────────────────────')
+        
+        var gasUsage = null
+        if (hasGas) {
+          if (gas_Inverted) gasUsage = Math.abs(Math.min(gasState, 0))
+          else gasUsage = Math.max(gasState, 0)
+          if (debug#id#) console.log('| | gasUsage = ' + gasUsage)
+        }
+      
+        var waterUsage = null
+        if (hasWater) {
+          if (water_Inverted) waterUsage = Math.abs(Math.min(waterState, 0))
+          else waterUsage = Math.max(waterState, 0)
+          if (debug#id#) console.log('| | waterUsage = ' + waterUsage)
+        }
+      
+        var totalFromGrid = 0
+        if (hasGrid) {
+          if (typeof eqLogic_grid === "number") {
+            if (eqLogic_grid_Inverted) totalFromGrid = Math.abs(Math.min(eqLogic_grid, 0))
+            else totalFromGrid = Math.max(eqLogic_grid, 0)
+          } else {
+            totalFromGrid = eqLogic_grid_consumption
+          }
+          if (debug#id#) console.log('| | totalFromGrid = ' + totalFromGrid)
+        }
+      
+        var returnedToGrid = null
+        if (hasReturnToGrid) {
+          if (typeof eqLogic_grid === "number") {
+            if (eqLogic_grid_Inverted) returnedToGrid = Math.max(eqLogic_grid, 0)
+            else returnedToGrid = Math.abs(Math.min(eqLogic_grid, 0))
+          } else {
+            returnedToGrid = eqLogic_grid_production
+          }
+          if (debug#id#) console.log('| | returnedToGrid = ' + returnedToGrid)
+        }
+        
+        var totalSolarProduction = 0
+        if (hasSolarProduction) {
+          if (eqLogic_solar_Inverted) totalSolarProduction = Math.abs(Math.min(eqLogic_totalSolarProduction, 0));
+          else totalSolarProduction = Math.max(eqLogic_totalSolarProduction, 0);
+          if (debug#id#) console.log('| | totalSolarProduction = ' + totalSolarProduction)
+        }
+      
+        var totalBatteryIn = null;
+        var totalBatteryOut = null;
+        if (hasBattery) {
+          if (typeof eqLogic_battery === "number"){
+            totalBatteryIn = (eqLogic_battery_Inverted) ? Math.max(eqLogic_battery, 0) : Math.abs(Math.min(eqLogic_battery, 0))
+            totalBatteryOut = (eqLogic_battery_Inverted) ? Math.abs(Math.min(eqLogic_battery, 0)) : Math.max(eqLogic_battery, 0)
+          } else {
+            totalBatteryIn = eqLogic_batteryProduction
+            totalBatteryOut = eqLogic_batteryConsumption
+          }
+          if (debug#id#) console.log('| | totalBatteryIn = ' + totalBatteryIn)
+          if (debug#id#) console.log('| | totalBatteryOut = ' + totalBatteryOut)
+        }
+      
+        var solarConsumption = null;
+        if (hasSolarProduction) {
+          solarConsumption = totalSolarProduction - ((returnedToGrid == null) ? 0 : returnedToGrid) - ((totalBatteryIn == null) ? 0 : totalBatteryIn);
+          if (debug#id#) console.log('| | solarConsumption = ' + solarConsumption)
+        }
+      
+        var batteryFromGrid = null;
+        var batteryToGrid = null;
+        if (solarConsumption !== null && solarConsumption < 0) {
+          // What we returned to the grid and what went in to the battery is more
+          // than produced, so we have used grid energy to fill the battery or
+          // returned battery energy to the grid
+          if (hasBattery) {
+            batteryFromGrid = Math.abs(solarConsumption);
+            if (batteryFromGrid > totalFromGrid) {
+              batteryToGrid = Math.min((batteryFromGrid - totalFromGrid), 0);
+              batteryFromGrid = totalFromGrid;
+            }
+          }
+          solarConsumption = 0;
+          if (debug#id#) console.log('| | NEW solarConsumption : ' + solarConsumption)
+        }
+      
+        var solarToBattery = null;
+        if (hasSolarProduction && hasBattery) {
+          if (!batteryToGrid) {
+            if (debug#id#) console.log('| | !batteryToGrid')
+            batteryToGrid = Math.max(0,(returnedToGrid || 0) - (totalSolarProduction || 0) - (totalBatteryIn || 0) - (batteryFromGrid || 0));
+            if (debug#id#) console.log('| | batteryToGrid = ' + batteryToGrid)
+          }
+          solarToBattery = ((totalBatteryIn) ? totalBatteryIn : 0) - (batteryFromGrid || 0);
+          if (debug#id#) console.log('| | solarToBattery = ' + solarToBattery)
+        } else if (!hasSolarProduction && hasBattery) {
+          batteryToGrid = returnedToGrid;
+          if (debug#id#) console.log('| | NEW batteryToGrid = ' + batteryToGrid)
+        }
+      
+        var solarToGrid = 0;
+        if (hasSolarProduction && returnedToGrid) {
+          solarToGrid = returnedToGrid - ((batteryToGrid) ? batteryToGrid : 0);
+        }
+        if (debug#id#) console.log('| | solarToGrid : ' + solarToGrid)
+  
+        var batteryConsumption = null;
+        if (hasBattery) {
+          batteryConsumption = ((totalBatteryOut !== null) ? totalBatteryOut : 0) - ((batteryToGrid !== null) ? batteryToGrid : 0)
+          if (debug#id#) console.log('| | batteryConsumption : ' + batteryConsumption)
+        }
+      
+        var gridConsumption = Math.max(totalFromGrid - ((batteryFromGrid !== null) ? batteryFromGrid : 0), 0);
+        if (debug#id#) console.log('| | gridConsumption : ' + gridConsumption)
+      
+        var totalHomeConsumption = Math.max(gridConsumption + ((solarConsumption !== null) ? solarConsumption : 0) + ((batteryConsumption !== null) ? batteryConsumption : 0), 0);
+        if (debug#id#) console.log('| | totalHomeConsumption : ' + totalHomeConsumption)
+      
+        var homeBatteryCircumference = undefined;
+        if (batteryConsumption !== null) {
+          homeBatteryCircumference = CIRCLE_CIRCUMFERENCE * (batteryConsumption / totalHomeConsumption);
+          if (debug#id#) console.log('| | homeBatteryCircumference : ' + homeBatteryCircumference)
+        }
+      
+        var homeSolarCircumference = undefined;
+        if (hasSolarProduction) {
+          //homeSolarCircumference = CIRCLE_CIRCUMFERENCE * (solarConsumption! / totalHomeConsumption);
+          homeSolarCircumference = CIRCLE_CIRCUMFERENCE * (solarConsumption / totalHomeConsumption);
+          if (debug#id#) console.log('| | homeSolarCircumference : ' + homeSolarCircumference)
+        }
+      
+        var homeGridCircumference = CIRCLE_CIRCUMFERENCE * ((totalHomeConsumption - ((batteryConsumption !== null) ? batteryConsumption : 0) - ((solarConsumption !== null) ? solarConsumption : 0)) / totalHomeConsumption);
+        if (debug#id#) console.log('| | homeGridCircumference : ' + homeGridCircumference)
+  
+        var totalLines = gridConsumption + (((solarConsumption !== null) ? solarConsumption : 0) + (solarToGrid + ((solarToBattery !== null) ? solarToBattery : 0)) + ((batteryConsumption !== null) ? batteryConsumption : 0) + ((batteryFromGrid !== null) ? batteryFromGrid : 0)) + ((batteryToGrid !== null) ? batteryToGrid : 0);
+        if (debug#id#) console.log('| | totalLines : ' + totalLines)
+  
+      
+        var batteryChargeState = eqLogic_battery_charge
+        var batteryIcon = '<path fill="currentColor" d="M16.67 4H15V2H9v2H7.33A1.33 1.33 0 0 0 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34A1.33 1.33 0 0 0 18 20.67V5.33C18 4.6 17.4 4 16.67 4Z"/>';
+        if (batteryChargeState === null) {
+        //batteryIcon = '<path fill="currentColor" d="M16 20H8V6h8m.67-2H15V2H9v2H7.33A1.33 1.33 0 0 0 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34A1.33 1.33 0 0 0 18 20.67V5.33C18 4.6 17.4 4 16.67 4Z"/>';
+        batteryIcon = '<path fill="currentColor" d="M16.67 4H15V2H9v2H7.33A1.33 1.33 0 0 0 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34A1.33 1.33 0 0 0 18 20.67V5.33C18 4.6 17.4 4 16.67 4Z"/>';
+        } else if (batteryChargeState <= 99 && batteryChargeState > 76) {
+          batteryIcon = '<path fill="currentColor" d="M16 20H8V6h8m.67-2H15V2H9v2H7.33C6.6 4 6 4.6 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34c.74 0 1.33-.59 1.33-1.33V5.33C18 4.6 17.4 4 16.67 4M15 16H9v3h6v-3m0-9H9v3h6V7m0 4.5H9v3h6v-3Z"/>';
+        } else if (batteryChargeState <= 75 && batteryChargeState > 51) {
+          batteryIcon = '<path fill="currentColor" d="M16 20H8V6h8m.67-2H15V2H9v2H7.33C6.6 4 6 4.6 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34c.74 0 1.33-.59 1.33-1.33V5.33C18 4.6 17.4 4 16.67 4M15 16H9v3h6v-3m0-4.5H9v3h6v-3Z"/>';
+        } else if (batteryChargeState <= 50 && batteryChargeState > 26) {
+          batteryIcon = '<path fill="currentColor" d="M16 20H8V6h8m.67-2H15V2H9v2H7.33C6.6 4 6 4.6 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34c.74 0 1.33-.59 1.33-1.33V5.33C18 4.6 17.4 4 16.67 4M15 16H9v3h6v-3"/>';
+        } else if (batteryChargeState <= 25) {
+          batteryIcon = '<path fill="currentColor" d="M16 20H8V6h8m.67-2H15V2H9v2H7.33A1.33 1.33 0 0 0 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34A1.33 1.33 0 0 0 18 20.67V5.33C18 4.6 17.4 4 16.67 4Z"/>';
+        }
+  
+        var newDur = {
+          batteryGrid: circleRate(((batteryFromGrid !== null) ? batteryFromGrid : ((batteryToGrid !== null) ? batteryToGrid : 0)), totalLines),
+          batteryToHome: circleRate( (batteryConsumption !== null) ? batteryConsumption : 0, totalLines),
+          gridToHome: circleRate(gridConsumption, totalLines),
+          solarToBattery: circleRate((solarToBattery !== null) ? solarToBattery : 0, totalLines),
+          solarToGrid: circleRate(solarToGrid, totalLines),
+          solarToHome: circleRate((solarConsumption !== null) ? solarConsumption : 0, totalLines),
+        };
+      
+        if (debug#id#) console.log('| | newDur.batteryGrid : ' + newDur.batteryGrid)
+        if (debug#id#) console.log('| | newDur.batteryToHome : ' + newDur.batteryToHome)
+        if (debug#id#) console.log('| | newDur.gridToHome : ' + newDur.gridToHome)
+        if (debug#id#) console.log('| | newDur.solarToBattery : ' + newDur.solarToBattery)
+        if (debug#id#) console.log('| | newDur.solarToGrid : ' + newDur.solarToGrid)
+        if (debug#id#) console.log('| | newDur.solarToHome : ' + newDur.solarToHome)
+      
+        if (debug#id#) console.log('| └──────────────────────────────────────────────────────')
+        var html = '';
+        html += '<div class="content#id#">'
+          ///////////////////////////////////////////////////////////////////////////
+          /////////////////////////// ROW 1 /////////////////////////////////////////
+          ///////////////////////////////////////////////////////////////////////////
+          if (hasSolarProduction || hasGas || hasWater) {
+            html += '<!-- (hasSolarProduction || hasGas || hasWater) -->'
+              html += '<div class="row#id#">'
+                html += '<div class="spacer#id#"></div>'
+      
+                if (hasSolarProduction) {
+                  html += '<!-- (hasSolarProduction) -->'
+                    html += '<div class="circle-container#id# solar#id#">'
+                      html += '<span class="label#id#">{{Solaire}}</span>'
+                      html += '<div class="circle#id#">'
+                        html += '<svg preserveAspectRatio="xMidYMid meet" focusable="false" role="img" aria-hidden="true" viewBox="0 0 24 24" class="svg-icon#id#">'
+                          html += '<g>'
+                            html += '<path d="M11.45,2V5.55L15,3.77L11.45,2M10.45,8L8,10.46L11.75,11.71L10.45,8M2,11.45L3.77,15L5.55,11.45H2M10,2H2V10C2.57,10.17 3.17,10.25 3.77,10.25C7.35,10.26 10.26,7.35 10.27,3.75C10.26,3.16 10.17,2.57 10,2M17,22V16H14L19,7V13H22L17,22Z"></path>'
+                          html += '</g>'
+                        html += '</svg>'
+                        html += displayValue#id#(totalSolarProduction)
+                      html += '</div>'
+                    html += '</div>'
+                  html += '<!-- FIN (hasSolarProduction) -->'
+                } else if(hasGas || hasWater){
+                  html += '<div class="spacer#id#"></div>'
+                }
+      
+                if(hasGas) {
+                  html += '<!-- (hasGas) -->'
+                    html += '<div class="circle-container#id# gas#id#">'
+                      html += '<span class="label#id#">{{Gaz}}</span>'
+                      html += '<div class="circle#id#">'
+                        html += '<svg preserveAspectRatio="xMidYMid meet" focusable="false" viewBox="0 0 24 24" class="svg-icon#id#">'
+                          html += '<g>'
+                            html += '<path d="M17.66 11.2C17.43 10.9 17.15 10.64 16.89 10.38C16.22 9.78 15.46 9.35 14.82 8.72C13.33 7.26 13 4.85 13.95 3C13 3.23 12.17 3.75 11.46 4.32C8.87 6.4 7.85 10.07 9.07 13.22C9.11 13.32 9.15 13.42 9.15 13.55C9.15 13.77 9 13.97 8.8 14.05C8.57 14.15 8.33 14.09 8.14 13.93C8.08 13.88 8.04 13.83 8 13.76C6.87 12.33 6.69 10.28 7.45 8.64C5.78 10 4.87 12.3 5 14.47C5.06 14.97 5.12 15.47 5.29 15.97C5.43 16.57 5.7 17.17 6 17.7C7.08 19.43 8.95 20.67 10.96 20.92C13.1 21.19 15.39 20.8 17.03 19.32C18.86 17.66 19.5 15 18.56 12.72L18.43 12.46C18.22 12 17.66 11.2 17.66 11.2M14.5 17.5C14.22 17.74 13.76 18 13.4 18.1C12.28 18.5 11.16 17.94 10.5 17.28C11.69 17 12.4 16.12 12.61 15.23C12.78 14.43 12.46 13.77 12.33 13C12.21 12.26 12.23 11.63 12.5 10.94C12.69 11.32 12.89 11.7 13.13 12C13.9 13 15.11 13.44 15.37 14.8C15.41 14.94 15.43 15.08 15.43 15.23C15.46 16.05 15.1 16.95 14.5 17.5H14.5Z"></path>'
+                          html += '</g>'
+                        html += '</svg>'
+                        html += formatNumber#id#(gasUsage) + ' ' + gasUnit#id#
+                      html += '</div>'
+                      html += '<svg width="80" height="30">'
+                        html += '<path d="M40 0 v30" id="gas#id#" />' //html += '<path d="M40 -10 v50" id="gas#id#" />'
+                        if(gasUsage) {
+                          html += '<circle r="3.4" class="gas#id#" vector-effect="non-scaling-stroke">'
+                            html += '<animateMotion dur="1.66s" repeatCount="indefinite" calcMode="linear">'
+                              html += '<mpath xlink:href="#gas#id#" />'
+                            html += '</animateMotion>'
+                          html += '</circle>'
+                        }
+                      html += '</svg>'
+                    html += '</div>'
+                  html += '<!-- FIN (hasGas) -->'
+                } else if(hasWater) {
+                  html += '<!-- else if(hasWater) -->'
+                    html += '<div class="circle-container#id# water#id#">'
+                      html += '<span class="label#id#">{{Eau}}</span>'
+                      html += '<div class="circle#id#">'
+                        html += '<svg preserveAspectRatio="xMidYMid meet" focusable="false" viewBox="0 0 24 24" class="svg-icon#id#">'
+                          html += '<g>'
+                            html += '<path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"></path>'
+                          html += '</g>'
+                        html += '</svg>'
+                        html += formatNumber#id#(waterUsage) + ' ' + waterUnit#id#
+                      html += '</div>'
+                      html += '<svg width="80" height="30">'
+                        html += '<path d="M40 0 v30" id="water#id#" />' //html += '<path d="M40 -10 v40" id="water#id#" />'
+                        if(waterUsage) {
+                          html += '<circle r="3.4" class="water#id#" vector-effect="non-scaling-stroke">'
+                            html += '<animateMotion dur="1.66s" repeatCount="indefinite" calcMode="linear">'
+                              html += '<mpath xlink:href="#water#id#" />'
+                            html += '</animateMotion>'
+                          html += '</circle>'
+                        }
+                      html += '</svg>'
+                    html += '</div>'
+                  html += '<!-- FIN else if(hasWater) -->'
+                } else {
+                  html += '<div class="spacer#id#"></div>'
+                }
+              html += '</div>'
+            html += '<!-- FIN (hasSolarProduction || hasGas || hasWater) -->'
+          }
+       
+          ///////////////////////////////////////////////////////////////////////////
+          /////////////////////////// ROW 2 /////////////////////////////////////////
+          ///////////////////////////////////////////////////////////////////////////
+      
+          /////////////// GRID      
+          html += '<div class="row#id#">'
+            if(hasGrid) {
+              html += '<!-- GRID -->'
+                html += '<div class="circle-container#id# grid#id#">'
+                  html += '<div class="circle#id#">'
+                    html += '<svg preserveAspectRatio="xMidYMid meet" focusable="false" viewBox="0 0 24 24" class="svg-icon#id#">'
+                      html += '<g>'
+                        html += '<path d="M8.28,5.45L6.5,4.55L7.76,2H16.23L17.5,4.55L15.72,5.44L15,4H9L8.28,5.45M18.62,8H14.09L13.3,5H10.7L9.91,8H5.38L4.1,10.55L5.89,11.44L6.62,10H17.38L18.1,11.45L19.89,10.56L18.62,8M17.77,22H15.7L15.46,21.1L12,15.9L8.53,21.1L8.3,22H6.23L9.12,11H11.19L10.83,12.35L12,14.1L13.16,12.35L12.81,11H14.88L17.77,22M11.4,15L10.5,13.65L9.32,18.13L11.4,15M14.68,18.12L13.5,13.64L12.6,15L14.68,18.12Z"></path>'
+                      html += '</g>'
+                    html += '</svg>'
+                    if(returnedToGrid !== null){
+                      html += '<span class="return#id#">'
+                        html += '<svg preserveAspectRatio="xMidYMid meet" focusable="false" viewBox="0 0 24 24" class="svg-icon#id# small#id#"">'
+                          html += '<g>'
+                            html += '<path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path>'
+                          html += '</g>'
+                        html += '</svg>'
+                        html += displayValue#id#(returnedToGrid)
+                      html += '</span>'
+                    }
+                    html += '<span class="consumption#id#">'
+                      html += '<svg preserveAspectRatio="xMidYMid meet" focusable="false" viewBox="0 0 24 24" class="svg-icon#id# small#id#">'
+                        html += '<g>'
+                          html += '<path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"></path>'
+                        html += '</g>'
+                      html += '</svg>'
+                      html += displayValue#id#(totalFromGrid)
+                    html += '</span>'
+                  html += '</div>'
+                  html += '<span class="label#id#">'
+                    html += '{{Réseau}}'
+                  html += '</span>'
+                html += '</div>'
+              html += '<!-- FIN GRID -->'
+            } else {
+              html += '<div class="spacer#id#"></div>'
+            }
+            /////////////// HOME
+            html += '<div class="circle-container#id# home#id#">'
+              html += '<div class="circle#id#'
+                if(!hasGrid && hasGas && hasWater) html += ' margin-bottom#id#'
+                html += '">'
+                html += '<svg  class="svg-icon#id#" preserveAspectRatio="xMidYMid meet" focusable="false" viewBox="0 0 24 24">'
+                  html += '<g><path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path></g>'
+                html += '</svg>'
+                html += displayValue#id#(totalHomeConsumption)
+                html += '<svg>'
+                  if (homeSolarCircumference !== undefined){
+                    html += '<circle  class="solar#id#" cx="40" cy="40" r="38" stroke-dasharray="'
+                    html += homeSolarCircumference + ' '
+                    html += CIRCLE_CIRCUMFERENCE - homeSolarCircumference
+                    html += '" shape-rendering="geometricPrecision" stroke-dashoffset="'
+                    html += -(CIRCLE_CIRCUMFERENCE - homeSolarCircumference)
+                    html += '"/>'
+                  }
+                  if (homeBatteryCircumference !== undefined) {
+                    html += '<circle class="battery#id#" cx="40" cy="40" r="38" stroke-dasharray="'
+                    html += homeBatteryCircumference + ' '
+                    html += CIRCLE_CIRCUMFERENCE - homeBatteryCircumference
+                    html += '" stroke-dashoffset="'
+                    html += -(CIRCLE_CIRCUMFERENCE - homeBatteryCircumference - (homeSolarCircumference || 0))
+                    html += '" shape-rendering="geometricPrecision" />'
+                  }
+                  html += '<circle class="grid#id#" cx="40" cy="40" r="38" stroke-dasharray="'
+                  if(homeGridCircumference !== undefined) html += CIRCLE_CIRCUMFERENCE - (homeSolarCircumference || 0) - (homeBatteryCircumference || 0) + ' '
+                  if(homeGridCircumference !== undefined) html += CIRCLE_CIRCUMFERENCE - homeGridCircumference
+                  else html += (homeSolarCircumference || 0) + (homeBatteryCircumference || 0)
+                  html += '" stroke-dashoffset="0" shape-rendering="geometricPrecision" />'
+                html += '</svg>'
+              html += '</div>'
+              if(!hasGas || !hasWater) {
+                html += '<span class="label#id#" >'
+                  html += '{{Maison}}'
+                html += '</span>'
+              }
+            html += '</div>'
+          html += '</div>'
+      
+          ///////////////////////////////////////////////////////////////////////////
+          /////////////////////////// ROW 3 /////////////////////////////////////////
+          ///////////////////////////////////////////////////////////////////////////      
+    
+          if (hasBattery || (hasWater && hasGas)){
+            html += '<!-- (hasBattery || (hasWater && hasGas)) -->'
+              html += '<div class="row#id#">'
+                html += '<div class="spacer#id#"></div>'
+      
+                if (hasBattery) {
+                  html += '<div class="circle-container#id# battery#id#">'
+                    html += '<div class="circle#id#">'
+                      if(batteryChargeState !== null){
+                        html += '<span>'
+                          html += batteryChargeState + '%'
+                        html += '</span>'
+                      }
+                      html += '<svg preserveAspectRatio="xMidYMid meet" focusable="false" role="img" aria-hidden="true" viewBox="0 0 24 24" class="svg-icon91688">'
+                        html += batteryIcon
+                      html += '</svg>'
+                      html += '<span class="battery-in#id#">'
+                        html += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="svg-icon#id# small#id#">'
+                          html += '<path d="M11 4h2v12l5.5-5.5l1.42 1.42L12 19.84l-7.92-7.92L5.5 10.5L11 16V4Z"/>'
+                        html += '</svg>'
+                        html += displayValue#id#(totalBatteryIn)
+                      html += '</span>'
+                      html += '<span class="battery-out#id#">'
+                        html += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="svg-icon#id# small#id#">'
+                          html += '<path d="M13 20h-2V8l-5.5 5.5l-1.42-1.42L12 4.16l7.92 7.92l-1.42 1.42L13 8v12Z"/>'
+                        html += '</svg>'
+                        html += displayValue#id#(totalBatteryOut)
+                      html += '</span>'
+                    html += '</div>'
+                    html += '<span class="label#id#">'
+                      html += '{{Batterie}}'
+                    html += '</span>'
+                  html += '</div>'
+                } else {
+                  html += '<div class="spacer#id#"></div>'
+                }
+        
+                if(hasGas && hasWater){
+                  html += '<div class="circle-container#id# water#id# bottom#id#">'
+                    html += '<svg width="80" height="30">'
+                      html += '<path d="M40 40 v-40" id="water#id#" />'
+                      if (waterUsage) {
+                        html += '<circle r="3.4" class="water#id#" vector-effect="non-scaling-stroke">'
+                          html += '<animateMotion dur="1.66s" repeatCount="indefinite" calcMode="linear">'
+                            html += '<mpath xlink:href="#water#id#" />'
+                          html += '</animateMotion>'
+                        html += '</circle>'
+                      }
+                    html += '</svg>'
+                    html += '<div class="circle#id#">'
+                      html += '<svg preserveAspectRatio="xMidYMid meet" focusable="false" viewBox="0 0 24 24" style="width: 25px;" class="svg-icon#id#">'
+                        html += '<g><path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"></path></g>'
+                      //html += '<g><path d="M12 22q-3.175 0-5.588-2.212T4 13.8q0-2.375 1.8-5.15t5.45-6q.15-.125.35-.2t.4-.075q.2 0 .4.075t.35.2q3.65 3.225 5.45 6T20 13.8q0 3.775-2.413 5.988T12 22Zm.275-3q.3-.025.513-.238T13 18.25q0-.35-.225-.563T12.2 17.5q-1.025.075-2.175-.563t-1.45-2.312q-.05-.275-.262-.45T7.825 14q-.35 0-.575.263t-.15.612q.425 2.275 2 3.25t3.175.875Z"/></g>'
+                  html += '</svg>'
+                      html += formatNumber#id#(waterUsage) + ' ' + waterUnit#id#
+                    html += '</div>'
+                    html += '<span class="label#id#">'
+                      html += '{{Eau}}'
+                    html += '</span>'
+                  html += '</div>'
+                } else {
+                  html += '<div class="spacer#id#"></div>'
+                }
+              html += '</div>'
+            html += '<!-- FIN (hasBattery || (hasWater && hasGas)) -->'
+          } else {
+            html += '<div class="spacer#id#"></div>'
+          }
+        
+          ///////////////////////  lines ///////////////////////////
+        
+          if(hasSolarProduction)
+          {
+            html += '<!-- (hasSolarProduction) -->'
+              html += '<div class = "lines#id#'
+                if (hasBattery) html += ' high#id#'
+                if (!hasBattery && hasGas && hasWater) html += ' water-gas#id#'
+              html += '">'
+                html += '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" id="solar-home-flow#id#">'
+                  html += '<path id="solar#id#" class="solar#id#" d="M'
+                  html += (hasBattery) ? 55 : 53
+                  html += ',0 v'
+                  html += (hasGrid) ? 15 : 17
+                  html += ' c0,'
+                  html += (hasBattery) ? '35 10,30 30,30' : '40 10,35 30,35'
+                  html += 'h25" vector-effect="non-scaling-stroke"></path>'
+                  if(solarConsumption){
+                    html += '<circle r="1" class="solar#id#" vector-effect="non-scaling-stroke">'
+                      html += '<animateMotion dur="' + newDur.solarToHome + 's" repeatCount="indefinite" calcMode="linear">'
+                        html += '<mpath xlink:href="#solar#id#" />'
+                      html += '</animateMotion>'
+                    html += '</circle>'
+                  }
+                html += '</svg>'
+              html += '</div>'
+            html += '<!-- FIN (hasSolarProduction) -->'
+          }
+  
+          if (hasReturnToGrid && hasSolarProduction) 
+          {
+            html += '<!-- (hasReturnToGrid && hasSolarProduction) -->'
+              html += '<div class = "lines#id#'
+              if (hasBattery) html += ' high#id#'
+              if (!hasBattery && hasGas && hasWater) html += ' water-gas#id#'
+              html += '">'
+                html += '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" id="solar-grid-flow#id#">'
+                  html += '<path id="return#id#" class="return#id#" d="M'
+                  html += (hasBattery) ? 45 : 47
+                  html += ',0 v15 c0,'
+                  html += (hasBattery) ? "35 -10,30 -30,30" : "40 -10,35 -30,35"
+                  html += ' h-20" vector-effect="non-scaling-stroke"></path>'
+                  if(solarToGrid && hasSolarProduction){
+                    html += '<circle r="1" class="return#id#" vector-effect="non-scaling-stroke">'
+                      html += '<animateMotion dur="' + newDur.solarToGrid + 's" repeatCount="indefinite" calcMode="linear">'
+                        html += '<mpath xlink:href="#return#id#" />'
+                      html += '</animateMotion>'
+                    html += '</circle>'
+                  }
+                html += '</svg>'
+              html += '</div>'
+            html += '<!-- FIN (hasReturnToGrid && hasSolarProduction) -->'
+          }
+  
+          if (hasBattery && hasSolarProduction)
+          {
+            html += '<!-- (hasBattery && hasSolarProduction) -->'
+              html += '<div class = "lines#id#'
+              if (hasBattery) html += ' high#id#'
+              if (!hasBattery && hasGas && hasWater) html += ' water-gas#id#'
+              html += '">'
+                html += '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" id="solar-battery-flow#id#">'
+                  html += '<path id="battery-solar#id#" class="battery-solar#id#" d="M50,0 V100" vector-effect="non-scaling-stroke" ></path>'
+                  if(solarToBattery){
+                    html += '<circle r="1" class="battery-solar#id#" vector-effect="non-scaling-stroke">'
+                      html += '<animateMotion dur="' + newDur.solarToBattery + 's" repeatCount="indefinite" calcMode="linear">'
+                        html += '<mpath xlink:href="#battery-solar#id#" />'
+                      html += '</animateMotion>'
+                    html += '</circle>'
+                  }
+                html += '</svg>'
+              html += '</div>'
+            html += '<!-- FIN (hasBattery && hasSolarProduction) -->'
+          }
+  
+          if(hasGrid){
+            html += '<!-- GRID [2] -->'
+              html += '<div class="lines#id# '
+              if (hasBattery) html += 'high#id# '
+              if (!hasBattery && hasGas && hasWater) html += 'water-gas#id#'
+              html += '">'
+                html += '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" id="grid-home-flow#id#">'
+                  html += '<path class="grid#id#" id="grid#id#" d="M0,'
+                  if (hasBattery) html += 50
+                  else if (hasSolarProduction) html += 56
+                  else html += 53
+                  html += ' H100" vector-effect="non-scaling-stroke"></path>'
+                  if(gridConsumption)
+                  {
+                    html += '<!-- (gridConsumption) -->'
+                      html += '<circle r="1" class="grid#id#" vector-effect="non-scaling-stroke">'
+                        html += '<animateMotion dur="' + newDur.gridToHome + 's" repeatCount="indefinite" calcMode="linear">'
+                          html += '<mpath xlink:href="#grid#id#" />'
+                        html += '</animateMotion>'
+                      html += '</circle>'
+                    html += '<!-- (gridConsumption) -->'
+                  }
+                html += '</svg>'
+              html += '</div>'
+            html += '<!-- FIN GRID[2] -->'
+          }
+  
+          if(hasBattery)
+          {
+            html += '<!-- (hasBattery) -->'
+              html += '<div class="lines#id# '
+              if (hasBattery) html += 'high#id# '
+              if (!hasBattery && hasGas && hasWater) html += 'water-gas#id#'
+              html += '">'
+                html += '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" id="battery-home-flow#id#">'
+                  html += '<path id="battery-home#id#" class="battery-home#id#" d="M55,100 v-'
+                  html += (hasGrid) ? 15 : 17
+                  html += ' c0,-35 10,-30 30,-30 h20" vector-effect="non-scaling-stroke"></path>'
+                  if(batteryConsumption)
+                  {
+                    html += '<circle r="1" class="battery-home#id#" vector-effect="non-scaling-stroke">'
+                      html += '<animateMotion dur="' + newDur.batteryToHome + 's" repeatCount="indefinite" calcMode="linear">'
+                        html += '<mpath xlink:href="#battery-home#id#" />'
+                      html += '</animateMotion>'
+                    html += '</circle>'
+                  }
+                html += '</svg>'
+              html += '</div>'
+            html += '<!-- FIN (hasBattery) -->'
+          }
+  
+          if(hasGrid && hasBattery){
+            html += '<!-- (GRID && hasBattery) -->'
+              html += '<div class="lines#id# '
+              if (hasBattery) html += 'high#id# '
+              if (!hasBattery && hasGas && hasWater) html += 'water-gas#id#'
+              html += '">'
+                html += '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" id="battery-grid-flow#id#">'
+                  html += '<path id="battery-grid#id#" class="return91688 '
+                  if(batteryFromGrid) html += 'battery-from-grid#id#'
+                  if(batteryToGrid) html += 'battery-to-grid#id#'
+                  html += '" d="M45,100 v-15 c0,-35 -10,-30 -30,-30 h-20" vector-effect="non-scaling-stroke"></path>'
+                  if(batteryFromGrid)
+                  {
+                    html += '<circle r="1" class="battery-from-grid#id#" vector-effect="non-scaling-stroke">'
+                      html += '<animateMotion dur="' + newDur.batteryGrid + 's" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear">'
+                        html += '<mpath xlink:href="#battery-grid#id#" />'
+                      html += '</animateMotion>'
+                    html += '</circle>'
+                  }
+                  if(batteryToGrid)
+                  {
+                    html += '<circle r="1" class="battery-to-grid#id#" vector-effect="non-scaling-stroke">'
+                      html += '<animateMotion dur="' + newDur.batteryGrid + 's" repeatCount="indefinite" calcMode="linear">'
+                        html += '<mpath xlink:href="#battery-grid#id#" />'
+                      html += '</animateMotion>'
+                    html += '</circle>'
+                  }
+                html += '</svg>'
+              html += '</div>'
+            html += '<!-- FIN (GRID && hasBattery) -->'
+          }
+  
+        html += '</div>'
+        
+        cmd.querySelector('.widget#id#').innerHTML=html;
+      }
+    })
+    
+    jeedom.cmd.refreshValue([{ cmd_id: '#id#', display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#'}])
+  
+  </script>
+  
+  <style>
+  :root {
+    --background#id# : transparent;
+    --icon-size#id#: 24px;
+    --secondary-text-color#id#: var(--txt-color);
+    --primary-text-color#id#: var(--link-color);
+    --gas-color#id# : #8E021B;
+    --solar-color#id#: #ff9800;
+    --grid-consumption-color#id#: #488fc2;
+    --grid-return-color#id#: #8353d1;
+    --water-color#id# : blue;
+    --battery-out-color#id# : #f06292;
+    --battery-in-color#id# : #69c1b8;
+    --border-width#id# : 0px;
+    --border-radius#id#: 12px;
+    --border-color#id#: var(--link-color);
+    
+    }
+    .content#id# {
+      position: relative;
+      padding: 16px;
+    }
+    .widget#id# {
+      background: var(--background#id#);
+      box-shadow: var(--box-shadow,none);
+      box-sizing: border-box;
+      border-radius: var(--border-radius#id#);
+      border-width: var(--border-width#id#);
+      border-style: solid;
+      border-color: var(--border-color#id#,#e0e0e0);
+      color: var(--primary-text-color#id#);
+      display: block;
+      /* transition: all 0.3s ease-out 0s;*/
+      position: relative;
+      line-height: 20px;
+    }
+    .svg-icon#id# {
+      /* display: var(--ha-icon-display,inline-flex); */
+      /* align-items: center; */
+      /* justify-content: center; */
+      /* position: relative; */
+      vertical-align: middle;
+      fill: currentcolor;
+      /* fill: var(--primary-text-color#id#);*/
+      width: var(--icon-size#id#);
+      height: var(--icon-size#id#);
+    }
+    /*
+    .svg-icon#id# svg {
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: block;
+    }
+    */
+    .circle#id# svg:not(.svg-icon#id#) {
+      position: absolute;
+      fill: none;
+      stroke-width: 4px;
+      width: 100%;
+      height: 100%;
+      top: 0px;
+      left: 0px;
+    }
+    .lines#id# {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 146px;
+      display: flex;
+      justify-content: center;
+      padding: 0 16px 16px;
+      box-sizing: border-box;
+    }
+    .lines#id#.water-gas#id# {
+      bottom: 110px;
+    }
+    .lines#id#.high#id# {
+      bottom: 100px;
+      height: 156px;
+    }
+    .lines#id# svg {
+      width: calc(100% - 160px);
+      height: 100%;
+      max-width: 340px;
+    }
+    .row#id# {
+      display: flex;
+      justify-content: space-between;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .circle-container#id# {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .circle-container#id#.solar#id# {
+      margin: 0 4px;
+      height: 130px;
+    }
+    .circle-container#id#.gas#id# {
+      margin-left: 4px;
+      height: 130px;
+    }
+    .circle-container#id#.water#id# {
+      margin-left: 4px;
+      height: 130px;
+    }
+    .circle-container#id#.water#id#.bottom#id# {
+      position: relative;
+      top: -20px;
+      margin-bottom: -20px;
+    }
+    .circle-container#id#.battery#id# {
+      height: 110px;
+      justify-content: flex-end;
+    }
+    .spacer#id# {
+      width: 84px;
+    }
+    .circle#id# {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      box-sizing: border-box;
+      border: 2px solid;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 12px;
+      line-height: 12px;
+      position: relative;
+      text-decoration: none;
+      color: var(--primary-text-color#id#);
+    }
+    .svg-icon#id# {
+      padding-bottom: 2px;
+    }
+    .svg-icon#id#.small#id# {
+      --icon-size#id#: 12px;
+    }
+    .label#id# {
+      color: var(--secondary-text-color#id#);
+      font-size: 12px;
+      opacity: 1;
+      height: 20px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 80px;
+      white-space: nowrap;
+    }
+    .lines#id# path {
+      stroke: var(--primary-text-color#id#);
+      stroke-width: 1;
+      fill: none;
+    }
+    
+    .circle#id# svg {
+      /* position: absolute; */
+      /* fill: none; */
+      /* stroke-width: 4px; */
+      /* width: 100%; */
+      /* height: 100%; */
+      /* top: 0px; */
+      /* left: 0px; */
+    }
+    .gas#id# circle, .gas#id# svg:not(.svg-icon#id#) path {
+      stroke: var(--gas-color#id#);
+    }
+    circle.gas#id# {
+      stroke-width: 4;
+      fill: var(--gas-color#id#);
+    }
+    .gas#id# .circle#id# {
+      border-color: var(--gas-color#id#);
+    }
+    .water#id# circle, .water#id# svg:not(.svg-icon#id#) path {
+      stroke: var(--water-color#id#);
+    }
+    circle.water#id# {
+      stroke-width: 4;
+      fill: var(--water-color#id#);
+    }
+    .water#id# .circle#id# {
+      border-color: var(--water-color#id#);
+    }
+    .solar#id# {
+      /* color: var(--primary-text-color); */
+    }
+    .solar#id# .circle#id# {
+      border-color: var(--solar-color#id#);
+    }
+    circle.solar#id#,
+    path.solar#id# {
+      stroke: var(--solar-color#id#);
+    }
+    circle.solar#id# {
+      stroke-width: 4;
+      fill: var(--solar-color#id#);
+    }
+    .battery#id# .circle#id# {
+      border-color: var(--battery-in-color#id#);
+    }
+    circle.battery#id#,
+    path.battery#id# {
+      stroke: var(--battery-out-color#id#);
+    }
+    path.battery-home#id#,
+    circle.battery-home#id# {
+      stroke: var(--battery-out-color#id#);
+    }
+    circle.battery-home#id# {
+      stroke-width: 4;
+      fill: var(--battery-out-color#id#);
+    }
+    path.battery-solar#id#,
+    circle.battery-solar#id# {
+      stroke: var(--battery-in-color#id#);
+    }
+    circle.battery-solar#id# {
+      stroke-width: 4;
+      fill: var(--battery-in-color#id#);
+    }
+    .battery-in#id# {
+      color: var(--battery-in-color#id#);
+    }
+    .battery-out#id# {
+      color: var(--battery-out-color#id#);
+    }
+    path.battery-from-grid#id# {
+      stroke: var(--grid-consumption-color#id#);
+    }
+    path.battery-to-grid#id# {
+      stroke: var(--grid-return-color#id#);
+    }
+    path.return#id#,
+    circle.return#id#,
+    circle.battery-to-grid#id# {
+      stroke: var(--grid-return-color#id#);
+    }
+    circle.return#id#,
+    circle.battery-to-grid#id# {
+      stroke-width: 4;
+      fill: var(--grid-return-color#id#);
+    }
+    .return#id# {
+      color: var(--grid-return-color#id#);
+    }
+    .grid#id# .circle#id# {
+      border-color: var(--grid-consumption-color#id#);
+    }
+    .consumption#id# {
+      color: var(--grid-consumption-color#id#);
+    }
+    circle.grid#id#,
+    circle.battery-from-grid#id#,
+    path.grid#id# {
+      stroke: var(--grid-consumption-color#id#);
+    }
+    circle.grid#id#,
+    circle.battery-from-grid#id# {
+      stroke-width: 4;
+      fill: var(--grid-consumption-color#id#);
+    }
+    .home#id# .circle#id# {
+      border-width: 0;
+      border-color: #03a9f4;
+    }
+    .home#id# .circle#id#.border#id# {
+      border-width: 2px;
+    }
+    .circle#id# svg circle {
+      animation: rotate-in#id# 0.6s ease-in;
+      transition: stroke-dashoffset 0.4s, stroke-dasharray 0.4s;
+      fill: none;
+    }
+    @keyframes rotate-in#id# {
+      from {
+        stroke-dashoffset: 238.76104;
+        stroke-dasharray: 238.76104;
+      }
+    }
+    .card-actions#id# a {
+      text-decoration: none;
+    }
+    .margin-bottom#id#{
+      margin-bottom: 20px;
+    }
+  </style>
+</div>
