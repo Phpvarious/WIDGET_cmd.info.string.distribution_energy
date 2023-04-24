@@ -2,7 +2,7 @@
   
   <!-- Widget name : cmd.info.string.distribution_energy
     Auteur        : Phpvarious
-    Version actuelle : 23/04/2023 v1
+    Version actuelle : 24/04/2023
     Lien          : https://phpvarious.github.io/documentation/widget/fr_FR/widget_scenario/distribution_energie/
   -->
   <template>
@@ -142,6 +142,7 @@
                 if (debug#id#) console.log('| | eqLogic_grid  = ' + cmdInfo)
                 eqLogic_grid = cmdInfo
                 hasGrid = true
+                hasReturnToGrid = true
                 if('#GridInverted#' != '#'+'GridInverted#' && '#GridInverted#' == 1){
                   eqLogic_grid_Inverted = true
                   if (debug#id#) console.log('| | grid_Inverted -> true')
