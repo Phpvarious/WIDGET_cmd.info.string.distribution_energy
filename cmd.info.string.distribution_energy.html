@@ -2,7 +2,7 @@
   
   <!-- Widget name : cmd.info.string.distribution_energy
     Auteur        : Phpvarious
-    Version actuelle : 26/04/2023
+    Version actuelle : 26/04/2023 23h40
     Lien          : https://phpvarious.github.io/documentation/widget/fr_FR/widget_scenario/distribution_energie/
   -->
   <template>
@@ -11,7 +11,7 @@
     <div>-- GridInverted : Inverse les valeurs de l'équipement Grid [1: inversé | 0: défaut]</div>
     <div>GridProduction :  ID de l'équipement réseau (vers réseau edf)</div>
     <div>GridConsumption : ID de l'équipement réseau (depuis réseau edf)</div>
-    <div>GridUnit : pour forcer une unité pour la totalité des valeurs (Réseau, Battery et MAison).</div>
+    <div>GridUnit : pour forcer une unité pour la totalité des valeurs (Réseau, Batterie et Maison).</div>
     <div> ------------ Solar ------------</div>
     <div>Solar : ID de l'équipement Solaire</div>
     <div>-- SolarInverted : Inverse les valeurs de l'équipement Solar [1: inversé | 0: défaut]</div>
@@ -24,7 +24,7 @@
     <div>BatteryTemp : ID de l'équipement pour la température (°C) de la batterie</div>
     <div> ------------ Gas --------------</div>
     <div>Gas : ID de l'équipement Gaz</div>
-    <div>GazUnit: Unité de la valeur [ défaut : m³]</div>
+    <div>GasUnit: Unité de la valeur [ défaut : m³]</div>
     <div> ----------- Water -------------</div>
     <div>Water : ID de l'équipement Water</div>
     <div>WaterUnit: Unité de la valeur [ défaut : m³]</div>
@@ -88,7 +88,7 @@
     if (is_numeric('#BorderRadius#')) document.documentElement.style.setProperty('--border-radius#id#', '#BorderRadius#px')
     if (is_numeric('#BorderWidth#')) document.documentElement.style.setProperty('--border-width#id#', '#BorderWidth#px')
     if ('#BorderColor#' != '#'+'BorderColor#') document.documentElement.style.setProperty('--border-color#id#', '#BorderColor#')
-    if ('#GazUnit#' != '#'+'GazUnit#') gasUnit#id# = '#GazUnit#'
+    if ('#GasUnit#' != '#'+'GasUnit#') gasUnit#id# = '#GasUnit#'
     if ('#WaterUnit#' != '#'+'WaterUnit#') waterUnit#id# = '#WaterUnit#'
     if ('#GridUnit#' != '#'+'GridUnit#') GridUnit#id# = '#GridUnit#'
    
@@ -114,7 +114,7 @@
       unit.replace("\"", "").replace("\'", "")
       if (isset(unite_conversion[unit])) {
         let mod = unite_conversion[unit][0]
-        let prefix = unite_conversion['W'].slice(1)
+        let prefix = unite_conversion[unit].slice(1)
         let myval = autoValueFormat(value, mod, prefix.length - 1)
         myval[0] = Math.trunc(myval[0] * trunc) / trunc
         return myval[0] + (space ? ' ' : '') + prefix[myval[1]];
@@ -593,6 +593,7 @@
         if (debug#id#) console.log('| | newDur.solarToHome : ' + newDur.solarToHome)
       
         if (debug#id#) console.log('| └──────────────────────────────────────────────────────')
+        
         var html = '';
         html += '<div class="content#id#">'
           ///////////////////////////////////////////////////////////////////////////
