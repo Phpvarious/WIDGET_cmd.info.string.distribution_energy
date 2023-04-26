@@ -2,7 +2,7 @@
   
   <!-- Widget name : cmd.info.string.distribution_energy
     Auteur        : Phpvarious
-    Version actuelle : 24/04/2023
+    Version actuelle : 26/04/2023
     Lien          : https://phpvarious.github.io/documentation/widget/fr_FR/widget_scenario/distribution_energie/
   -->
   <template>
@@ -11,7 +11,7 @@
     <div>-- GridInverted : Inverse les valeurs de l'équipement Grid [1: inversé | 0: défaut]</div>
     <div>GridProduction :  ID de l'équipement réseau (vers réseau edf)</div>
     <div>GridConsumption : ID de l'équipement réseau (depuis réseau edf)</div>
-    
+    <div>GridUnit : pour forcer une unité pour la totalité des valeurs (Réseau, Battery et MAison).</div>
     <div> ------------ Solar ------------</div>
     <div>Solar : ID de l'équipement Solaire</div>
     <div>-- SolarInverted : Inverse les valeurs de l'équipement Solar [1: inversé | 0: défaut]</div>
@@ -21,6 +21,7 @@
     <div>BatteryProduction : ID de l'équipement battery (Entrée batterie)</div>
     <div>BatteryConsumption :  ID de l'équipement battery (Sortie batterie)</div>
     <div>BatteryState : ID de l'équipement pour l'état de charge de la batterie (%)</div>
+    <div>BatteryTemp : ID de l'équipement pour la température (°C) de la batterie</div>
     <div> ------------ Gas --------------</div>
     <div>Gas : ID de l'équipement Gaz</div>
     <div>GazUnit: Unité de la valeur [ défaut : m³]</div>
@@ -72,6 +73,7 @@
     
     var gasUnit#id# = "m³"
     var waterUnit#id# = "m³"
+    var GridUnit#id# = ''
     
     if ('#DefautColor#' != '#'+'DefautColor#') document.documentElement.style.setProperty('--primary-text-color#id#', '#DefautColor#') // icones + texte
     if ('#LabelColor#' != '#'+'LabelColor#') document.documentElement.style.setProperty('--secondary-text-color#id#', '#LabelColor#') // lebel
@@ -83,34 +85,58 @@
     if ('#BatteryOutColor#' != '#'+'BatteryOutColor#') document.documentElement.style.setProperty('--battery-out-color#id#', '#BatteryOutColor#')
     if ('#BatteryInColor#' != '#'+'BatteryInColor#') document.documentElement.style.setProperty('--battery-in-color#id#', '#BatteryInColor#')
     if ('#Background#' != '#'+'Background#') document.documentElement.style.setProperty('--background#id#', '#Background#')
-    if ('#BorderRadius#' != '#'+'BorderRadius#') document.documentElement.style.setProperty('--border-radius#id#', '#BorderRadius#px')
-    if ('#BorderWidth#' != '#'+'BorderWidth#') document.documentElement.style.setProperty('--border-width#id#', '#BorderWidth#px')
+    if (is_numeric('#BorderRadius#')) document.documentElement.style.setProperty('--border-radius#id#', '#BorderRadius#px')
+    if (is_numeric('#BorderWidth#')) document.documentElement.style.setProperty('--border-width#id#', '#BorderWidth#px')
     if ('#BorderColor#' != '#'+'BorderColor#') document.documentElement.style.setProperty('--border-color#id#', '#BorderColor#')
     if ('#GazUnit#' != '#'+'GazUnit#') gasUnit#id# = '#GazUnit#'
     if ('#WaterUnit#' != '#'+'WaterUnit#') waterUnit#id# = '#WaterUnit#'
+    if ('#GridUnit#' != '#'+'GridUnit#') GridUnit#id# = '#GridUnit#'
    
     
     var MAX_FLOW_RATE#id# = 6; //3
     var MIN_FLOW_RATE#id# = 0.75; //10
     var RadiusCircle = 38
     var CIRCLE_CIRCUMFERENCE = 2 * Math.PI * RadiusCircle
-    var energieUnit#id# = 'kWh'
-    var kw_decimals#id# = 1
+    
+    
+    var unite_conversion = {
+      'W' : [1000, 'W', 'kW', 'MW'],
+      'Wh' : [1000, 'Wh', 'kWh', 'MWh'],
+      'l' : [1000, 'l', 'm<sup>3</sup>']
+    }
     
     function circleRate(value, total){
       return MAX_FLOW_RATE#id# - (value / total) * (MAX_FLOW_RATE#id# - MIN_FLOW_RATE#id#);
     };
     
-    function displayValue#id#(value){
+    function autoValueArray(value, unit = '', trunc = 100, space = false) {
       if (value === null) return "0";
-      //let isKW = value > 1000;
-      let v = value.toFixed(1)
-      return v + ' ' + energieUnit#id#;
+      unit.replace("\"", "").replace("\'", "")
+      if (isset(unite_conversion[unit])) {
+        let mod = unite_conversion[unit][0]
+        let prefix = unite_conversion['W'].slice(1)
+        let myval = autoValueFormat(value, mod, prefix.length - 1)
+        myval[0] = Math.trunc(myval[0] * trunc) / trunc
+        return myval[0] + (space ? ' ' : '') + prefix[myval[1]];
+      } else {
+        return Math.trunc(value * trunc) / trunc + (space ? ' ' : '') + unit;
+      }
     }
-    function formatNumber#id#(value, digits=1){
-      if (value === null) return "0";
-      let v = value.toFixed(digits)
-      return v
+    
+    function autoValueFormat(value, mod = 1000, maxdiv = 10) {
+      let val = 0
+      if (value < 0) {
+        val = parseFloat(-value)
+      } else {
+        val = parseFloat(value)
+      }
+      for (div = 0; div < maxdiv && val >= mod; div++) {
+        val = parseFloat(val / mod)
+      }
+      if (value < 0) {
+        val = -val;
+      }
+      return Array(val, div)
     }
     
     if (debug#id#) console.log('└──────────────────────────────────────────────────────')
@@ -134,10 +160,11 @@
             async: false,
             noCache: true,
             error: function(error) {
-              if (debug#id#) console.log('| | ERREUR !!!')
+              if (debug#id#) console.log('| | ERREUR jeedom.cmd.execute(Grid) !!!')
               hasGrid = false
             },
             success: function (cmdInfo) {
+              if (cmdInfo == '') cmdInfo = 0
               if (typeof cmdInfo === "number") {
                 if (debug#id#) console.log('| | eqLogic_grid  = ' + cmdInfo)
                 eqLogic_grid = cmdInfo
@@ -147,48 +174,75 @@
                   eqLogic_grid_Inverted = true
                   if (debug#id#) console.log('| | grid_Inverted -> true')
                 }
+                ////////////////////
+                if(GridUnit#id# == ''){
+                  jeedom.cmd.byId({
+                    id : '#Grid#',
+                    async: false,
+                    noCache: true,
+                    error: function(error) {
+                      if (debug#id#) console.log('| | ERREUR jeedom.cmd.byId(Grid) !!!')
+                    },
+                    success: function (cmdInfo2) {
+                      GridUnit#id# = cmdInfo2.unite
+                      if (GridUnit#id# == '') console.log('| | Equipement sans unité')
+                      else console.log('| | unité : ' + GridUnit#id#)
+                    }
+                  })
+                }
+                ////////////////////
               }
             }
           })
         }
-        else
-        {
-          if('#GridConsumption#' != '#'+'GridConsumption#'){
-            jeedom.cmd.execute({
-              id : '#GridConsumption#',
-              async: false,
-              noCache: true,
-              error: function(error) {
-                if (debug#id#) console.log('| | ERREUR !!!')
-              },
-              success: function (cmdInfo) {
-                if (typeof cmdInfo === "number") {
-                  if (debug#id#) console.log('| | eqLogic_grid_consumption  = ' + cmdInfo)
-                   hasGrid = true
-                   eqLogic_grid_consumption = cmdInfo
-                }
-              }
-            })
-          }
-          if (hasGrid){
-            if ('#GridProduction#' != '#'+'GridProduction#'){
-              jeedom.cmd.execute({
-                id : '#GridProduction#',
-                async: false,
-                noCache: true,
-                error: function(error) {
-                  if (debug#id#) console.log('| | ERREUR !!!')
-                },
-                success: function (cmdInfo) {
-                  if (typeof cmdInfo === "number") {
-                    if (debug#id#) console.log('| | eqLogic_grid_production  = ' + cmdInfo)
-                    eqLogic_grid_production = cmdInfo
-                    hasReturnToGrid = true
+        else if('#GridConsumption#' != '#'+'GridConsumption#' && '#GridProduction#' != '#'+'GridProduction#'){
+          jeedom.cmd.execute({
+            id : '#GridConsumption#',
+            async: false,
+            noCache: true,
+            error: function(error) {
+              if (debug#id#) console.log('| | ERREUR jeedom.cmd.execute(GridConsumption) !!!')
+            },
+            success: function (cmdInfo) {
+              if (typeof cmdInfo === "number") {
+                eqLogic_grid_consumption = cmdInfo
+                jeedom.cmd.execute({
+                  id : '#GridProduction#',
+                  async: false,
+                  noCache: true,
+                  error: function(error) {
+                    if (debug#id#) console.log('| | ERREUR jeedom.cmd.execute(GridProduction) !!!')
+                  },
+                  success: function (cmdInfo2) {
+                    if (typeof cmdInfo2 === "number") {
+                      eqLogic_grid_production = cmdInfo2
+                      if (debug#id#) console.log('| | eqLogic_grid_production  = ' + eqLogic_grid_production)
+                      if (debug#id#) console.log('| | eqLogic_grid_consumption  = ' + eqLogic_grid_consumption)
+                      hasGrid = true
+                      hasReturnToGrid = true
+                      ////////////////////
+                      if(GridUnit#id# == ''){
+                        jeedom.cmd.byId({
+                          id : '#GridConsumption#',
+                          async: false,
+                          noCache: true,
+                          error: function(error) {
+                            if (debug#id#) console.log('| | ERREUR jeedom.cmd.byId(GridConsumption) !!!')
+                          },
+                          success: function (cmdInfo2) {
+                            GridUnit#id# = cmdInfo2.unite
+                            if (GridUnit#id# == '') console.log('| | Equipement sans unité')
+                            else console.log('| | unité : ' + GridUnit#id#)
+                          }
+                        })
+                      }
+                      ////////////////////
+                    }
                   }
-                }
-              })
+                })
+              }
             }
-          }
+          })
         }
         if (debug#id#) console.log('| └──────────────────────────────────────────────────────')
       
@@ -203,7 +257,7 @@
             async: false,
             noCache: true,
             error: function(error) {
-              if (debug#id#) console.log('| | ERREUR !!!')
+              if (debug#id#) console.log('| | ERREUR jeedom.cmd.execute(Solar) !!!')
             },
             success: function (cmdInfo) {
               if (typeof cmdInfo === "number") {
@@ -224,6 +278,7 @@
         var hasBattery = false;
         var eqLogic_battery = false // si valeur le calcul sera fait en fonction de celle-ci
         var eqLogic_battery_charge = null
+        var batteryTempState = null
         var eqLogic_batteryProduction = false
         var eqLogic_batteryConsumption = false
         var eqLogic_battery_Inverted = false
@@ -234,7 +289,7 @@
             async: false,
             noCache: true,
             error: function(error) {
-              if (debug#id#) console.log('| | ERREUR !!!')
+              if (debug#id#) console.log('| | ERREUR jeedom.cmd.execute(Battery)!!!')
             },
             success: function (cmdInfo) {
               if (typeof cmdInfo === "number") {
@@ -255,7 +310,7 @@
             async: false,
             noCache: true,
             error: function(error) {
-              if (debug#id#) console.log('| | ERREUR !!!')
+              if (debug#id#) console.log('| | ERREUR jeedom.cmd.execute(BatteryConsumption) !!!')
             },
             success: function (cmdInfo) {
               if (typeof cmdInfo === "number") {
@@ -265,7 +320,7 @@
                   async: false,
                   noCache: true,
                   error: function(error) {
-                    if (debug#id#) console.log('| | ERREUR !!!')
+                    if (debug#id#) console.log('| | ERREUR jeedom.cmd.execute(BatteryProduction) !!!')
                   },
                   success: function (cmdInfo2) {
                     if (typeof cmdInfo2 === "number") {
@@ -287,12 +342,28 @@
               async: false,
               noCache: true,
               error: function(error) {
-                if (debug#id#) console.log('| | ERREUR !!!')
+                if (debug#id#) console.log('| | ERREUR jeedom.cmd.execute(BatteryState) !!!')
               },
               success: function (cmdInfo) {
                 if (typeof cmdInfo === "number") {
                   eqLogic_battery_charge = cmdInfo
                   if (debug#id#) console.log('| | eqLogic_battery_charge = ' + cmdInfo)
+                }
+              }
+            })
+          }
+          if('#BatteryTemp#' != '#'+'BatteryTemp#'){
+            jeedom.cmd.execute({
+              id : '#BatteryTemp#',
+              async: false,
+              noCache: true,
+              error: function(error) {
+                if (debug#id#) console.log('| | ERREUR jeedom.cmd.execute(BatteryTemp)!!!')
+              },
+              success: function (cmdInfo2) {
+                if (typeof cmdInfo2 === "number") {
+                  batteryTempState = cmdInfo2
+                  if (debug#id#) console.log('| | batteryTempState = ' + batteryTempState)
                 }
               }
             })
@@ -311,7 +382,7 @@
             async: false,
             noCache: true,
             error: function(error) {
-              if (debug#id#) console.log('| | ERREUR !!!')
+              if (debug#id#) console.log('| | ERREUR jeedom.cmd.execute(Gas) !!!')
             },
             success: function (cmdInfo) {
               if (typeof cmdInfo === "number") {
@@ -339,7 +410,7 @@
             async: false,
             noCache: true,
             error: function(error) {
-              if (debug#id#) console.log('| | ERREUR !!!')
+              if (debug#id#) console.log('| | ERREUR jeedom.cmd.execute(Water) !!!')
             },
             success: function (cmdInfo) {
               if (typeof cmdInfo === "number") {
@@ -542,7 +613,7 @@
                             html += '<path d="M11.45,2V5.55L15,3.77L11.45,2M10.45,8L8,10.46L11.75,11.71L10.45,8M2,11.45L3.77,15L5.55,11.45H2M10,2H2V10C2.57,10.17 3.17,10.25 3.77,10.25C7.35,10.26 10.26,7.35 10.27,3.75C10.26,3.16 10.17,2.57 10,2M17,22V16H14L19,7V13H22L17,22Z"></path>'
                           html += '</g>'
                         html += '</svg>'
-                        html += displayValue#id#(totalSolarProduction)
+                        html += autoValueArray(totalSolarProduction,GridUnit#id#,1000)
                       html += '</div>'
                     html += '</div>'
                   html += '<!-- FIN (hasSolarProduction) -->'
@@ -560,7 +631,7 @@
                             html += '<path d="M17.66 11.2C17.43 10.9 17.15 10.64 16.89 10.38C16.22 9.78 15.46 9.35 14.82 8.72C13.33 7.26 13 4.85 13.95 3C13 3.23 12.17 3.75 11.46 4.32C8.87 6.4 7.85 10.07 9.07 13.22C9.11 13.32 9.15 13.42 9.15 13.55C9.15 13.77 9 13.97 8.8 14.05C8.57 14.15 8.33 14.09 8.14 13.93C8.08 13.88 8.04 13.83 8 13.76C6.87 12.33 6.69 10.28 7.45 8.64C5.78 10 4.87 12.3 5 14.47C5.06 14.97 5.12 15.47 5.29 15.97C5.43 16.57 5.7 17.17 6 17.7C7.08 19.43 8.95 20.67 10.96 20.92C13.1 21.19 15.39 20.8 17.03 19.32C18.86 17.66 19.5 15 18.56 12.72L18.43 12.46C18.22 12 17.66 11.2 17.66 11.2M14.5 17.5C14.22 17.74 13.76 18 13.4 18.1C12.28 18.5 11.16 17.94 10.5 17.28C11.69 17 12.4 16.12 12.61 15.23C12.78 14.43 12.46 13.77 12.33 13C12.21 12.26 12.23 11.63 12.5 10.94C12.69 11.32 12.89 11.7 13.13 12C13.9 13 15.11 13.44 15.37 14.8C15.41 14.94 15.43 15.08 15.43 15.23C15.46 16.05 15.1 16.95 14.5 17.5H14.5Z"></path>'
                           html += '</g>'
                         html += '</svg>'
-                        html += formatNumber#id#(gasUsage) + ' ' + gasUnit#id#
+                        html += autoValueArray(gasUsage,gasUnit#id#,1000)
                       html += '</div>'
                       html += '<svg width="80" height="30">'
                         html += '<path d="M40 0 v30" id="gas#id#" />' //html += '<path d="M40 -10 v50" id="gas#id#" />'
@@ -584,7 +655,7 @@
                             html += '<path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"></path>'
                           html += '</g>'
                         html += '</svg>'
-                        html += formatNumber#id#(waterUsage) + ' ' + waterUnit#id#
+                        html += autoValueArray(waterUsage,waterUnit#id#,1000)
                       html += '</div>'
                       html += '<svg width="80" height="30">'
                         html += '<path d="M40 0 v30" id="water#id#" />' //html += '<path d="M40 -10 v40" id="water#id#" />'
@@ -627,7 +698,7 @@
                             html += '<path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path>'
                           html += '</g>'
                         html += '</svg>'
-                        html += displayValue#id#(returnedToGrid)
+                        html += autoValueArray(returnedToGrid,GridUnit#id#)
                       html += '</span>'
                     }
                     html += '<span class="consumption#id#">'
@@ -636,7 +707,7 @@
                           html += '<path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"></path>'
                         html += '</g>'
                       html += '</svg>'
-                      html += displayValue#id#(totalFromGrid)
+                      html += autoValueArray(totalFromGrid,GridUnit#id#)
                     html += '</span>'
                   html += '</div>'
                   html += '<span class="label#id#">'
@@ -655,7 +726,7 @@
                 html += '<svg  class="svg-icon#id#" preserveAspectRatio="xMidYMid meet" focusable="false" viewBox="0 0 24 24">'
                   html += '<g><path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path></g>'
                 html += '</svg>'
-                html += displayValue#id#(totalHomeConsumption)
+                html += autoValueArray(totalHomeConsumption,GridUnit#id#,1000)
                 html += '<svg>'
                   if (homeSolarCircumference !== undefined){
                     html += '<circle  class="solar#id#" cx="40" cy="40" r="38" stroke-dasharray="'
@@ -700,10 +771,18 @@
                 if (hasBattery) {
                   html += '<div class="circle-container#id# battery#id#">'
                     html += '<div class="circle#id#">'
-                      if(batteryChargeState !== null){
-                        html += '<span>'
-                          html += batteryChargeState + '%'
-                        html += '</span>'
+                      if(batteryChargeState !== null && batteryTempState !== null){
+                        html += '<div class="scroll-container#id#">'
+                        html += '<div class="scroll-text#id#">'+ autoValueArray(batteryChargeState,'%', 1) + '<br>'+ autoValueArray(batteryTempState, '°C', 10)
+                        html += '</div></div>'
+                      } else if (batteryChargeState !== null) {
+                          html += '<span>'
+                          html += autoValueArray(batteryChargeState,'%', 1)
+                          html += '</span>'
+                      } else if (batteryTempState !== null) {
+                          html += '<span>'
+                          html += autoValueArray(batteryTempState, '°C', 10)
+                          html += '</span>'
                       }
                       html += '<svg preserveAspectRatio="xMidYMid meet" focusable="false" role="img" aria-hidden="true" viewBox="0 0 24 24" class="svg-icon#id#">'
                         html += batteryIcon
@@ -712,13 +791,13 @@
                         html += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="svg-icon#id# small#id#">'
                           html += '<path d="M11 4h2v12l5.5-5.5l1.42 1.42L12 19.84l-7.92-7.92L5.5 10.5L11 16V4Z"/>'
                         html += '</svg>'
-                        html += displayValue#id#(totalBatteryIn)
+                        html += autoValueArray(totalBatteryIn,GridUnit#id#)
                       html += '</span>'
                       html += '<span class="battery-out#id#">'
                         html += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="svg-icon#id# small#id#">'
                           html += '<path d="M13 20h-2V8l-5.5 5.5l-1.42-1.42L12 4.16l7.92 7.92l-1.42 1.42L13 8v12Z"/>'
                         html += '</svg>'
-                        html += displayValue#id#(totalBatteryOut)
+                        html += autoValueArray(totalBatteryOut,GridUnit#id#)
                       html += '</span>'
                     html += '</div>'
                     html += '<span class="label#id#">'
@@ -746,7 +825,7 @@
                         html += '<g><path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"></path></g>'
                       //html += '<g><path d="M12 22q-3.175 0-5.588-2.212T4 13.8q0-2.375 1.8-5.15t5.45-6q.15-.125.35-.2t.4-.075q.2 0 .4.075t.35.2q3.65 3.225 5.45 6T20 13.8q0 3.775-2.413 5.988T12 22Zm.275-3q.3-.025.513-.238T13 18.25q0-.35-.225-.563T12.2 17.5q-1.025.075-2.175-.563t-1.45-2.312q-.05-.275-.262-.45T7.825 14q-.35 0-.575.263t-.15.612q.425 2.275 2 3.25t3.175.875Z"/></g>'
                   html += '</svg>'
-                      html += formatNumber#id#(waterUsage) + ' ' + waterUnit#id#
+                      html += autoValueArray(waterUsage,waterUnit#id#,1000)
                     html += '</div>'
                     html += '<span class="label#id#">'
                       html += '{{Eau}}'
@@ -961,29 +1040,16 @@
       border-color: var(--border-color#id#,#e0e0e0);
       color: var(--primary-text-color#id#);
       display: block;
-      /* transition: all 0.3s ease-out 0s;*/
       position: relative;
       line-height: 20px;
     }
     .svg-icon#id# {
-      /* display: var(--ha-icon-display,inline-flex); */
-      /* align-items: center; */
-      /* justify-content: center; */
-      /* position: relative; */
       vertical-align: middle;
       fill: currentcolor;
-      /* fill: var(--primary-text-color#id#);*/
       width: var(--icon-size#id#);
       height: var(--icon-size#id#);
+      padding-bottom: 2px;
     }
-    /*
-    .svg-icon#id# svg {
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      display: block;
-    }
-    */
     .circle#id# svg:not(.svg-icon#id#) {
       position: absolute;
       fill: none;
@@ -1067,9 +1133,7 @@
       position: relative;
       text-decoration: none;
       color: var(--primary-text-color#id#);
-    }
-    .svg-icon#id# {
-      padding-bottom: 2px;
+      overflow: hidden;
     }
     .svg-icon#id#.small#id# {
       --icon-size#id#: 12px;
@@ -1088,16 +1152,6 @@
       stroke: var(--primary-text-color#id#);
       stroke-width: 1;
       fill: none;
-    }
-    
-    .circle#id# svg {
-      /* position: absolute; */
-      /* fill: none; */
-      /* stroke-width: 4px; */
-      /* width: 100%; */
-      /* height: 100%; */
-      /* top: 0px; */
-      /* left: 0px; */
     }
     .gas#id# circle, .gas#id# svg:not(.svg-icon#id#) path {
       stroke: var(--gas-color#id#);
@@ -1118,9 +1172,6 @@
     }
     .water#id# .circle#id# {
       border-color: var(--water-color#id#);
-    }
-    .solar#id# {
-      /* color: var(--primary-text-color); */
     }
     .solar#id# .circle#id# {
       border-color: var(--solar-color#id#);
@@ -1220,6 +1271,44 @@
     }
     .margin-bottom#id#{
       margin-bottom: 20px;
+    } 
+    .scroll-container#id# {
+      height: 12px;
+      overflow: hidden;
+    }
+    .scroll-text#id# {
+      height: 100%;
+      text-align: center;
+      -moz-animation: my-animation#id# 10s linear infinite;
+      -webkit-animation: my-animation#id# 10s linear infinite;
+      animation: my-animation#id# 10s linear infinite;
+    }
+    @keyframes my-animation#id# {
+      0% {
+        -moz-transform: translateY(0%);
+        -webkit-transform: translateY(0%);
+        transform: translateY(0%);
+      }
+      40% {
+        -moz-transform: translateY(0%);
+        -webkit-transform: translateY(0%);
+        transform: translateY(0%);
+      }
+      50% {
+        -moz-transform: translateY(-100%);
+        -webkit-transform: translateY(-100%);
+        transform: translateY(-100%);
+      }
+      90% {
+        -moz-transform: translateY(-100%);
+        -webkit-transform: translateY(-100%);
+        transform: translateY(-100%);
+      }
+      100% {
+        -moz-transform: translateY(0%);
+        -webkit-transform: translateY(0%);
+        transform: translateY(0%);
+      }
     }
   </style>
 </div>
