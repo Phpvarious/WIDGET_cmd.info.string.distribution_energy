@@ -1,7 +1,7 @@
 <div class="cmd #history# tooltips cmd-widget" data-type="info" data-subtype="string" data-cmd_id="#id#" data-cmd_uid="#uid#" data-version="#version#" data-eqLogic_id="#eqLogic_id#" style="width: 100%;">  
   <!-- Widget name : cmd.info.string.distribution_energy
     Auteur        : Phpvarious
-    Version actuelle : 07/05/2023 18h00
+    Version actuelle : 02/06/2023 16h00
     Lien          : https://phpvarious.github.io/documentation/widget/fr_FR/widget_scenario/distribution_energie/
   -->  
   <div class="widget#id#" id="widget#id#"></div>
@@ -317,7 +317,8 @@
               if (debug#id#) console.log('perso1State.unit  = ' + perso1State.unit)
               if (perso1State.value > 0 && !HideCirclePerso1#id#) document.getElementById("CirclePerso1ToGrid#id#")?.classList.remove("hidden#id#")
               else document.getElementById("CirclePerso1ToGrid#id#")?.classList.add("hidden#id#")
-              if ((perso1State.value == 0 && !HideIfEmpty#id#) || perso1State.value > 0) document.getElementById("Perso1Value#id#").innerHTML = perso1State.value + perso1State.unit
+              //if ((perso1State.value == 0 && !HideIfEmpty#id#) || perso1State.value > 0) document.getElementById("Perso1Value#id#").innerHTML = perso1State.value + perso1State.unit
+              if ((perso1State.value == 0 && !HideIfEmpty#id#) || perso1State.value != 0) document.getElementById("Perso1Value#id#").innerHTML = perso1State.value + perso1State.unit
               else document.getElementById("Perso1Value#id#").innerHTML = ''
             })
           }
@@ -368,7 +369,8 @@
               if (debug#id#) console.log('perso2State.unit  = ' + perso2State.unit)
               if (perso2State.value > 0 && !HideCirclePerso2#id#) document.getElementById("CirclePerso2ToGrid#id#")?.classList.remove("hidden#id#")
               else document.getElementById("CirclePerso2ToGrid#id#")?.classList.add("hidden#id#")
-              if ((perso2State.value == 0 && !HideIfEmpty#id#) || perso2State.value > 0) document.getElementById("Perso2Value#id#").innerHTML = perso2State.value + '' + perso2State.unit
+              //if ((perso2State.value == 0 && !HideIfEmpty#id#) || perso2State.value > 0) document.getElementById("Perso2Value#id#").innerHTML = perso2State.value + '' + perso2State.unit
+              if ((perso2State.value == 0 && !HideIfEmpty#id#) || perso2State.value != 0) document.getElementById("Perso2Value#id#").innerHTML = perso2State.value + '' + perso2State.unit
               else document.getElementById("Perso2Value#id#").innerHTML = ''
             })
           }
@@ -913,7 +915,8 @@
               if (debug#id#) console.log('gasState.unit  = ' + gasState.unit)
               if (gasState.value > 0 && !HideCircleGas#id#) document.getElementById("CircleGasToHome#id#")?.classList.remove("hidden#id#")
               else document.getElementById("CircleGasToHome#id#")?.classList.add("hidden#id#");
-              if ((gasState.value == 0 && !HideIfEmpty#id#) || gasState.value > 0) document.getElementById("GasValue#id#").innerHTML = gasState.value + gasState.unit
+              //if ((gasState.value == 0 && !HideIfEmpty#id#) || gasState.value > 0) document.getElementById("GasValue#id#").innerHTML = gasState.value + gasState.unit
+              if ((gasState.value == 0 && !HideIfEmpty#id#) || gasState.value != 0) document.getElementById("GasValue#id#").innerHTML = gasState.value + gasState.unit
              })
           }
         }
@@ -970,7 +973,8 @@
                 if (debug#id#) console.log('waterState.unit  = ' + waterState.unit)
                 if (waterState.value > 0 && !HideCircleWater#id#) document.getElementById("CircleWaterToHome#id#")?.classList.remove("hidden#id#")
                 else document.getElementById("CircleWaterToHome#id#")?.classList.add("hidden#id#")
-                if ((waterState.value == 0 && !HideIfEmpty#id#) || waterState.value > 0) document.getElementById("WaterValue#id#").innerHTML = waterState.value + waterState.unit
+                //if ((waterState.value == 0 && !HideIfEmpty#id#) || waterState.value > 0) document.getElementById("WaterValue#id#").innerHTML = waterState.value + waterState.unit
+                if ((waterState.value == 0 && !HideIfEmpty#id#) || waterState.value != 0) document.getElementById("WaterValue#id#").innerHTML = waterState.value + waterState.unit
               })
             }
           }
@@ -1113,7 +1117,8 @@
                     html += '<div class="circle#id#">'
                       if(perso1Icon#id# != 0) html += '<i class="' + perso1Icon#id# + '"></i>'
                       html += '<span id="Perso1Value#id#">'
-                        if ((perso1State#id#.value == 0 && !HideIfEmpty#id#) || perso1State#id#.value > 0) html += perso1State#id#.value + '' + perso1State#id#.unit
+                        //if ((perso1State#id#.value == 0 && !HideIfEmpty#id#) || perso1State#id#.value > 0) html += perso1State#id#.value + '' + perso1State#id#.unit
+                        if ((perso1State#id#.value == 0 && !HideIfEmpty#id#) || perso1State#id#.value != 0) html += perso1State#id#.value + '' + perso1State#id#.unit
                       html += '</span>'
                     html += '</div>'
                     html += '<svg width="80" height="30">'
@@ -1143,7 +1148,8 @@
                         html += '</svg>'
                       } else if (perso2Icon#id# != 0) html += '<i class="' + perso2Icon#id# + '"></i>'
                       html += '<span id="Perso2Value#id#">'
-                        if ((perso2State#id#.value == 0 && !HideIfEmpty#id#) || perso2State#id#.value > 0) html += perso2State#id#.value + '' + perso2State#id#.unit
+                        //if ((perso2State#id#.value == 0 && !HideIfEmpty#id#) || perso2State#id#.value > 0) html += perso2State#id#.value + '' + perso2State#id#.unit
+                        if ((perso2State#id#.value == 0 && !HideIfEmpty#id#) || perso2State#id#.value != 0) html += perso2State#id#.value + '' + perso2State#id#.unit
                       html += '</span>'
                     html += '</div>'
                     html += '<svg width="80" height="30">'
@@ -1199,7 +1205,8 @@
                         html += '</svg>'
                       } else if (gasIcon#id# != 0) html += '<i class="' + gasIcon#id# + '"></i>'
                       html += '<span id="GasValue#id#">'
-                        if ((gasState#id#.value == 0 && !HideIfEmpty#id#) || gasState#id#.value > 0) html += gasState#id#.value + '' + gasState#id#.unit
+                        //if ((gasState#id#.value == 0 && !HideIfEmpty#id#) || gasState#id#.value > 0) html += gasState#id#.value + '' + gasState#id#.unit
+                        if ((gasState#id#.value == 0 && !HideIfEmpty#id#) || gasState#id#.value != 0) html += gasState#id#.value + '' + gasState#id#.unit
                       html += '</span>'
                     html += '</div>'
                     html += '<svg width="80" height="30">'
@@ -1231,7 +1238,8 @@
                         html += '</svg>'
                       } else if (waterIcon#id# != 0) html += '<i class="' + waterIcon#id# + '"></i>'
                       html += '<span id="WaterValue#id#">'
-                        if ((waterState#id#.value == 0 && !HideIfEmpty#id#) || waterState#id#.value > 0) html += waterState#id#.value + '' + waterState#id#.unit
+                        //if ((waterState#id#.value == 0 && !HideIfEmpty#id#) || waterState#id#.value > 0) html += waterState#id#.value + '' + waterState#id#.unit
+                        if ((waterState#id#.value == 0 && !HideIfEmpty#id#) || waterState#id#.value != 0) html += waterState#id#.value + '' + waterState#id#.unit
                       html += '</span>'
                     html += '</div>'
                     html += '<svg width="80" height="30">'
@@ -1398,7 +1406,8 @@
                       html += '</svg>'
                     } else if (perso2Icon#id# != 0) html += '<i class="' + perso2Icon#id# + '"></i>'
                     html += '<span id="Perso2Value#id#">'
-                    if ((perso2State#id#.value == 0 && !HideIfEmpty#id#) || perso2State#id#.value > 0) html += perso2State#id#.value + '' + perso2State#id#.unit
+                    //if ((perso2State#id#.value == 0 && !HideIfEmpty#id#) || perso2State#id#.value > 0) html += perso2State#id#.value + '' + perso2State#id#.unit
+                    if ((perso2State#id#.value == 0 && !HideIfEmpty#id#) || perso2State#id#.value != 0) html += perso2State#id#.value + '' + perso2State#id#.unit
                     html += '</span>'
                   html += '</div>'
                   html += '<span class="label#id#">' + perso2Name#id# + '</span>'
@@ -1479,7 +1488,8 @@
                       html += '</svg>'
                     } else if (waterIcon#id# != 0) html += '<i class="' + waterIcon#id# + '"></i>'
                     html += '<span id="WaterValue#id#">'
-                      if ((waterState#id#.value == 0 && !HideIfEmpty#id#) || waterState#id#.value > 0) html += waterState#id#.value + '' + waterState#id#.unit
+                      //if ((waterState#id#.value == 0 && !HideIfEmpty#id#) || waterState#id#.value > 0) html += waterState#id#.value + '' + waterState#id#.unit
+                      if ((waterState#id#.value == 0 && !HideIfEmpty#id#) || waterState#id#.value != 0) html += waterState#id#.value + '' + waterState#id#.unit
                     html += '</span>'
                   html += '</div>'
                   html += '<span class="label#id#">' + waterName#id# + '</span>'
