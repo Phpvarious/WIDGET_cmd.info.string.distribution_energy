@@ -1,17 +1,19 @@
 <div class="cmd #history# tooltips cmd-widget" data-type="info" data-subtype="string" data-cmd_id="#id#" data-cmd_uid="#uid#" data-version="#version#" data-eqLogic_id="#eqLogic_id#" style="width: 100%;">  
   <!-- Widget name : cmd.info.string.distribution_energy
     Auteur        : Phpvarious
-    Version actuelle : 02/06/2023 22h00
+    Version actuelle : 25/01/2024 07h15
     Lien          : https://phpvarious.github.io/documentation/widget/fr_FR/widget_scenario/distribution_energie/
   -->  
   <div class="widget#id#" id="widget#id#"></div>
   
   <script>
-    var debug#id# = ('#debug#' == 1) ? true : false;
+    var version#id# = '25/01/2024 07h15'
+    var debug#id# = ('#debug#' == 1) ? true : false
     var fullJs#id# = false
     var jeedomVersion#id# = 4.4
     
     if (debug#id#) console.log('┌─────────────────── Widget Distribution energy [#id#] Compatibilité V4.2 V4.3 V4.4 ───────────────')
+    if (debug#id#) console.log('| Version -> ' + version#id#)
     /* Compatibilité V4.2 V4.3 V4.4 */
     /**/ if(typeof jeeFrontEnd === 'undefined') {
     /**/   if (debug#id#) console.log('| jeeFrontEnd no exist -> version <= 4.2')
@@ -35,7 +37,7 @@
     ////////////////////////// Général /////////////////////////
     var updateByCmd#id# = true
     var HideIfEmpty#id# = true
-    var MarginTop#id# = 1;
+    var MarginTop#id# = 1
     if (is_numeric('#UpdateByCmd#') && '#UpdateByCmd#' == 0) updateByCmd#id# = false
     if (is_numeric('#HideIfEmpty#') && '#HideIfEmpty#' == 0) HideIfEmpty#id# = false
     if (is_numeric('#Scale#')) {
@@ -197,8 +199,8 @@
     //if (is_numeric('#HomeDec#') && '#HomeDec#' >= 0) HomeDec#id# = 1 + '' + "0".repeat('#HomeDec#')
     
     
-    var MAX_FLOW_RATE#id# = 6; //3
-    var MIN_FLOW_RATE#id# = 0.75; //10
+    var MAX_FLOW_RATE#id# = 6 //3
+    var MIN_FLOW_RATE#id# = 0.75 //10
     var RadiusCircle#id# = 38
     var CIRCLE_CIRCUMFERENCE#id# = 2 * Math.PI * RadiusCircle#id#
     
@@ -210,7 +212,7 @@
     
     function circleRate#id#(value, total){
       if (total == 0) return MAX_FLOW_RATE#id#
-      return MAX_FLOW_RATE#id# - (value / total) * (MAX_FLOW_RATE#id# - MIN_FLOW_RATE#id#);
+      return MAX_FLOW_RATE#id# - (value / total) * (MAX_FLOW_RATE#id# - MIN_FLOW_RATE#id#)
     }
     
     function autoValueArray#id#(value, unit = '', trunc = 1, round = false) {
@@ -253,29 +255,29 @@
         val = parseFloat(val / mod)
       }
       if (value < 0) {
-        val = -val;
+        val = -val
       }
       return Array(val, div)
     }
     
     function getBatteryIcon#id#(value=false) {
         if (value < 99 && value >= 76) {
-          return '<path fill="currentColor" d="M16 20H8V6h8m.67-2H15V2H9v2H7.33C6.6 4 6 4.6 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34c.74 0 1.33-.59 1.33-1.33V5.33C18 4.6 17.4 4 16.67 4M15 16H9v3h6v-3m0-9H9v3h6V7m0 4.5H9v3h6v-3Z"/>';
+          return '<path fill="currentColor" d="M16 20H8V6h8m.67-2H15V2H9v2H7.33C6.6 4 6 4.6 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34c.74 0 1.33-.59 1.33-1.33V5.33C18 4.6 17.4 4 16.67 4M15 16H9v3h6v-3m0-9H9v3h6V7m0 4.5H9v3h6v-3Z"/>'
         } else if (value < 76 && value >= 51) {
-          return '<path fill="currentColor" d="M16 20H8V6h8m.67-2H15V2H9v2H7.33C6.6 4 6 4.6 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34c.74 0 1.33-.59 1.33-1.33V5.33C18 4.6 17.4 4 16.67 4M15 16H9v3h6v-3m0-4.5H9v3h6v-3Z"/>';
+          return '<path fill="currentColor" d="M16 20H8V6h8m.67-2H15V2H9v2H7.33C6.6 4 6 4.6 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34c.74 0 1.33-.59 1.33-1.33V5.33C18 4.6 17.4 4 16.67 4M15 16H9v3h6v-3m0-4.5H9v3h6v-3Z"/>'
         } else if (value < 51 && value >= 25) {
-          return '<path fill="currentColor" d="M16 20H8V6h8m.67-2H15V2H9v2H7.33C6.6 4 6 4.6 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34c.74 0 1.33-.59 1.33-1.33V5.33C18 4.6 17.4 4 16.67 4M15 16H9v3h6v-3"/>';
+          return '<path fill="currentColor" d="M16 20H8V6h8m.67-2H15V2H9v2H7.33C6.6 4 6 4.6 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34c.74 0 1.33-.59 1.33-1.33V5.33C18 4.6 17.4 4 16.67 4M15 16H9v3h6v-3"/>'
         } else if (value < 25) {
-          return '<path fill="currentColor" d="M16 20H8V6h8m.67-2H15V2H9v2H7.33A1.33 1.33 0 0 0 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34A1.33 1.33 0 0 0 18 20.67V5.33C18 4.6 17.4 4 16.67 4Z"/>';
+          return '<path fill="currentColor" d="M16 20H8V6h8m.67-2H15V2H9v2H7.33A1.33 1.33 0 0 0 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34A1.33 1.33 0 0 0 18 20.67V5.33C18 4.6 17.4 4 16.67 4Z"/>'
         } else {
-          return '<path fill="currentColor" d="M16.67 4H15V2H9v2H7.33A1.33 1.33 0 0 0 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34A1.33 1.33 0 0 0 18 20.67V5.33C18 4.6 17.4 4 16.67 4Z"/>';
+          return '<path fill="currentColor" d="M16.67 4H15V2H9v2H7.33A1.33 1.33 0 0 0 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34A1.33 1.33 0 0 0 18 20.67V5.33C18 4.6 17.4 4 16.67 4Z"/>'
           //return '<path fill="currentColor" d="M16 20H8V6h8m.67-2H15V2H9v2H7.33A1.33 1.33 0 0 0 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34A1.33 1.33 0 0 0 18 20.67V5.33C18 4.6 17.4 4 16.67 4Z"/>'
           //return '<path fill="currentColor" d="M16.67 4H15V2H9v2H7.33A1.33 1.33 0 0 0 6 5.33v15.34C6 21.4 6.6 22 7.33 22h9.34A1.33 1.33 0 0 0 18 20.67V5.33C18 4.6 17.4 4 16.67 4Z"/>'
         }
     }
     
     if (debug#id#) console.log('| ┌────────────────────── Param Perso 1 ────────────────────')
-    var hasPerso1#id# = false;
+    var hasPerso1#id# = false
     var perso1State#id# = 0
     if(is_numeric('#Perso1#')){
       jeedom.cmd.execute({
@@ -331,7 +333,7 @@
     if (debug#id#) console.log('| └─────────────────────────────────────────────────────────')
     
     if (debug#id#) console.log('| ┌────────────────────── Param Perso 2 ────────────────────')    
-    var hasPerso2#id# = false;
+    var hasPerso2#id# = false
     var perso2State#id# = 0
     if(is_numeric('#Perso2#')){
       jeedom.cmd.execute({
@@ -386,7 +388,7 @@
     if (debug#id#) console.log('| └─────────────────────────────────────────────────────────')
     
     if (debug#id#) console.log('| ┌────────────────────── Param Grid ────────────────────')
-    var hasGrid#id# = false;
+    var hasGrid#id# = false
     var gridInverted#id# = false
     var hasReturnToGrid#id# = false
     var powerFailure#id# = false
@@ -604,7 +606,7 @@
              jeedom.cmd.addUpdateFunction('#PowerFailure#', function(_options) {
                if (_options.value != undefined) 
                {
-                 if (_options.value >= 1) document.getElementById("powerFailure#id#")?.classList.add("blink#id#");
+                 if (_options.value >= 1) document.getElementById("powerFailure#id#")?.classList.add("blink#id#")
                  else document.getElementById("powerFailure#id#")?.classList.remove("blink#id#")
                }
              })
@@ -683,10 +685,10 @@
     var hasBattery#id# = false
     var batteryTempState#id# = null
     var batteryInverted#id# = false
-    var totalBatteryIn#id# = null;
-    var totalBatteryOut#id# = null;
-    var totalBatteryInNoUnit#id# = null;
-    var totalBatteryOutNoUnit#id# = null;
+    var totalBatteryIn#id# = null
+    var totalBatteryOut#id# = null
+    var totalBatteryInNoUnit#id# = null
+    var totalBatteryOutNoUnit#id# = null
     var batteryChargeState#id# = null
     
     if (is_numeric('#Battery#')) {
@@ -951,7 +953,7 @@
                 if (debug#id#) console.log('gasState.value  = ' + gasState.value)
                 if (debug#id#) console.log('gasState.unit  = ' + gasState.unit)
                 if (gasState.value > 0 && !HideCircleGas#id#) document.getElementById("CircleGasToHome#id#")?.classList.remove("hidden#id#")
-                else document.getElementById("CircleGasToHome#id#")?.classList.add("hidden#id#");
+                else document.getElementById("CircleGasToHome#id#")?.classList.add("hidden#id#")
                 //if ((gasState.value == 0 && !HideIfEmpty#id#) || gasState.value > 0) document.getElementById("GasValue#id#").innerHTML = gasState.value + gasState.unit
                 if ((gasState.value == 0 && !HideIfEmpty#id#) || gasState.value != 0) document.getElementById("GasValue#id#").innerHTML = gasState.value + gasState.unit
               }
@@ -1036,88 +1038,91 @@
     
     
     function calculate#id#(init=true,el='') {
-      var ElDomExist = !!document.getElementById("widget#id#");
-      if (debug#id#) console.log("ElDomExist ?",ElDomExist);
+      var ElDomExist = !!document.getElementById("widget#id#")
+      if (debug#id#) console.log("ElDomExist ?",ElDomExist)
       if (ElDomExist) {
         if (debug#id#) console.log('┌─────────────────── Widget Distribution energy [#id#] en debug (calculate) ───────────────')
         if (debug#id#) console.log('| ┌──────────────────────── VALUES ──────────────────────')
         if (el != '' && debug#id#) console.log('| | launched by ' + el)
       
-        var solarConsumption = null;
+        var solarConsumption = null
         if (hasSolarProduction#id#) {
-          solarConsumption = totalSolarProductionNoUnit#id# - ((returnedToGridNoUnit#id# == null) ? 0 : returnedToGridNoUnit#id#) - ((totalBatteryInNoUnit#id# == null) ? 0 : totalBatteryInNoUnit#id#);
+          solarConsumption = totalSolarProductionNoUnit#id# - ((returnedToGridNoUnit#id# == null) ? 0 : returnedToGridNoUnit#id#) - ((totalBatteryInNoUnit#id# == null) ? 0 : totalBatteryInNoUnit#id#)
           if (debug#id#) console.log('| | solarConsumption = ' + solarConsumption)
         }
       
-        var batteryFromGrid = null;
-        var batteryToGrid = null;
+        var batteryFromGrid = null
+        var batteryToGrid = null
         if (solarConsumption !== null && solarConsumption < 0) {
           // What we returned to the grid and what went in to the battery is more
           // than produced, so we have used grid energy to fill the battery or
           // returned battery energy to the grid
           if (hasBattery#id#) {
-            batteryFromGrid = Math.abs(solarConsumption);
+            batteryFromGrid = Math.abs(solarConsumption)
             if (batteryFromGrid > totalFromGridNoUnit#id#) { // 1000 > 5000
-              batteryToGrid = Math.min((batteryFromGrid - totalFromGridNoUnit#id#), 0);
-              batteryFromGrid = totalFromGridNoUnit#id#;
+              batteryToGrid = Math.min((batteryFromGrid - totalFromGridNoUnit#id#), 0)
+              batteryFromGrid = totalFromGridNoUnit#id#
             } else {
-              batteryToGrid = batteryFromGrid // add
-              batteryFromGrid = 0; // add
+              //batteryToGrid = batteryFromGrid // add
+              //batteryFromGrid = 0 // add
             }
           }
-          solarConsumption = 0;
+          solarConsumption = 0
           if (debug#id#) console.log('| | NEW solarConsumption : ' + solarConsumption)
         }
-      
-        var solarToBattery = null;
+if (!batteryToGrid) if (debug#id#) console.log('| | !batteryToGrid')
+if (!batteryFromGrid) if (debug#id#) console.log('| | !batteryFromGrid')
+        var solarToBattery = null
         if (hasSolarProduction#id# && hasBattery#id#) {
           if (!batteryToGrid) {
             if (debug#id#) console.log('| | !batteryToGrid')
             batteryToGrid = Math.max(0,(returnedToGridNoUnit#id# || 0) - (totalSolarProductionNoUnit#id# || 0) - (totalBatteryInNoUnit#id# || 0) - (batteryFromGrid || 0))
             if (debug#id#) console.log('| | batteryToGrid = ' + batteryToGrid)
           }
-          solarToBattery = ((totalBatteryInNoUnit#id#) ? totalBatteryInNoUnit#id# : 0) - (batteryFromGrid || 0);
+          solarToBattery = ((totalBatteryInNoUnit#id#) ? totalBatteryInNoUnit#id# : 0) - (batteryFromGrid || 0)
           if (debug#id#) console.log('| | solarToBattery = ' + solarToBattery)
         } else if (!hasSolarProduction#id# && hasBattery#id#) {
-          batteryToGrid = returnedToGridNoUnit#id#;
+          batteryToGrid = returnedToGridNoUnit#id#
           if (debug#id#) console.log('| | NEW batteryToGrid = ' + batteryToGrid)
         }
       
-        var solarToGrid = 0;
+        var solarToGrid = 0
         if (hasSolarProduction#id# && returnedToGridNoUnit#id#) {
-          solarToGrid = returnedToGridNoUnit#id# - ((batteryToGrid) ? batteryToGrid : 0);
+          solarToGrid = returnedToGridNoUnit#id# - ((batteryToGrid) ? batteryToGrid : 0)
         }
         if (debug#id#) console.log('| | solarToGrid : ' + solarToGrid)
   
-        var batteryConsumption = null;
+        var batteryConsumption = null
         if (hasBattery#id#) {
           batteryConsumption = ((totalBatteryOutNoUnit#id# !== null) ? totalBatteryOutNoUnit#id# : 0) - ((batteryToGrid !== null) ? batteryToGrid : 0)
           if (debug#id#) console.log('| | batteryConsumption : ' + batteryConsumption)
         }
       
-        var gridConsumption = Math.max(totalFromGridNoUnit#id# - ((batteryFromGrid !== null) ? batteryFromGrid : 0), 0);
+        var gridConsumption = Math.max(totalFromGridNoUnit#id# - ((batteryFromGrid !== null) ? batteryFromGrid : 0), 0)
+        
         if (debug#id#) console.log('| | gridConsumption : ' + gridConsumption)
+        
       
-        var totalHomeConsumption = Math.max(gridConsumption + ((solarConsumption !== null) ? solarConsumption : 0) + ((batteryConsumption !== null) ? batteryConsumption : 0), 0);
+        var totalHomeConsumption = Math.max(gridConsumption + ((solarConsumption !== null) ? solarConsumption : 0) + ((batteryConsumption !== null) ? batteryConsumption : 0), 0)
         if (debug#id#) console.log('| | totalHomeConsumption : ' + totalHomeConsumption)
       
-        var homeBatteryCircumference = undefined;
+        var homeBatteryCircumference = undefined
         if (batteryConsumption !== null) {
-          homeBatteryCircumference = CIRCLE_CIRCUMFERENCE#id# * (batteryConsumption / totalHomeConsumption);
+          homeBatteryCircumference = CIRCLE_CIRCUMFERENCE#id# * (batteryConsumption / totalHomeConsumption)
           if (debug#id#) console.log('| | homeBatteryCircumference : ' + homeBatteryCircumference)
         }
       
-        var homeSolarCircumference = undefined;
+        var homeSolarCircumference = undefined
         if (hasSolarProduction#id#) {
-          //homeSolarCircumference = CIRCLE_CIRCUMFERENCE#id# * (solarConsumption! / totalHomeConsumption);
-          homeSolarCircumference = CIRCLE_CIRCUMFERENCE#id# * (solarConsumption / totalHomeConsumption);
+          //homeSolarCircumference = CIRCLE_CIRCUMFERENCE#id# * (solarConsumption! / totalHomeConsumption)
+          homeSolarCircumference = CIRCLE_CIRCUMFERENCE#id# * (solarConsumption / totalHomeConsumption)
           if (debug#id#) console.log('| | homeSolarCircumference : ' + homeSolarCircumference)
         }
       
-        var homeGridCircumference = CIRCLE_CIRCUMFERENCE#id# * ((totalHomeConsumption - ((batteryConsumption !== null) ? batteryConsumption : 0) - ((solarConsumption !== null) ? solarConsumption : 0)) / totalHomeConsumption);
+        var homeGridCircumference = CIRCLE_CIRCUMFERENCE#id# * ((totalHomeConsumption - ((batteryConsumption !== null) ? batteryConsumption : 0) - ((solarConsumption !== null) ? solarConsumption : 0)) / totalHomeConsumption)
         if (debug#id#) console.log('| | homeGridCircumference : ' + homeGridCircumference)
   
-        var totalLines = gridConsumption + (((solarConsumption !== null) ? solarConsumption : 0) + (solarToGrid + ((solarToBattery !== null) ? solarToBattery : 0)) + ((batteryConsumption !== null) ? batteryConsumption : 0) + ((batteryFromGrid !== null) ? batteryFromGrid : 0)) + ((batteryToGrid !== null) ? batteryToGrid : 0);
+        var totalLines = gridConsumption + (((solarConsumption !== null) ? solarConsumption : 0) + (solarToGrid + ((solarToBattery !== null) ? solarToBattery : 0)) + ((batteryConsumption !== null) ? batteryConsumption : 0) + ((batteryFromGrid !== null) ? batteryFromGrid : 0)) + ((batteryToGrid !== null) ? batteryToGrid : 0)
         if (debug#id#) console.log('| | totalLines : ' + totalLines)
   
         var greenValue#id# = 0
@@ -1132,7 +1137,7 @@
           solarToBattery: circleRate#id#((solarToBattery !== null) ? solarToBattery : 0, totalLines),
           solarToGrid: circleRate#id#(solarToGrid, totalLines),
           solarToHome: circleRate#id#((solarConsumption !== null) ? solarConsumption : 0, totalLines),
-        };
+        }
       
         if (debug#id#) console.log('| | newDur.batteryGrid : ' + newDur.batteryGrid)
         if (debug#id#) console.log('| | newDur.batteryToHome : ' + newDur.batteryToHome)
@@ -1144,7 +1149,7 @@
         if (debug#id#) console.log('| └──────────────────────────────────────────────────────')
       
         if (init) {
-          var html = '';
+          var html = ''
           html += '<div class="content#id#">'
             ///////////////////////////////////////////////////////////////////////////
             /////////////////////////// ROW 1 /////////////////////////////////////////
@@ -1406,7 +1411,10 @@
                       html += '" shape-rendering="geometricPrecision" />'
                     }
                     html += '<circle class="grid#id#" id="circle_grid#id#" cx="40" cy="40" r="38" stroke-dasharray="'
-                    if(homeGridCircumference !== undefined) html += CIRCLE_CIRCUMFERENCE#id# - (homeSolarCircumference || 0) - (homeBatteryCircumference || 0) + ' '
+                    if(homeGridCircumference !== undefined) {
+                      if(homeGridCircumference > 0) html += CIRCLE_CIRCUMFERENCE#id# - (homeSolarCircumference || 0) - (homeBatteryCircumference || 0) + ' '
+                      else html += 0 + ' '
+                    }
                     if(homeGridCircumference !== undefined) html += CIRCLE_CIRCUMFERENCE#id# - homeGridCircumference
                     else html += (homeSolarCircumference || 0) + (homeBatteryCircumference || 0)
                     html += '" stroke-dashoffset="0" shape-rendering="geometricPrecision" />'
@@ -1714,9 +1722,9 @@
             document.getElementById("TotalFromGridValue#id#").innerHTML = totalFromGrid#id#.value + '' + totalFromGrid#id#.unit
             if (HideIfEmpty#id#){
               if (returnedToGrid#id#.value > 0) document.getElementById("IconReturn#id#")?.classList.remove('hidden#id#')
-              else document.getElementById("IconReturn#id#")?.classList.add('hidden#id#');
+              else document.getElementById("IconReturn#id#")?.classList.add('hidden#id#')
               if (totalFromGrid#id#.value > 0) document.getElementById("IconConsumption#id#")?.classList.remove('hidden#id#')
-              else document.getElementById("IconConsumption#id#")?.classList.add('hidden#id#');
+              else document.getElementById("IconConsumption#id#")?.classList.add('hidden#id#')
             }
           }
           // GREEN
@@ -1725,7 +1733,7 @@
             document.getElementById("greenValue#id#").innerHTML = greenValue#id#.value + '' + greenValue#id#.unit
             if (HideIfEmpty#id#){
               if (greenValue#id#.value > 0) document.getElementById("IconGreen#id#")?.classList.remove('hidden#id#')
-              else document.getElementById("IconGreen#id#")?.classList.add('hidden#id#');
+              else document.getElementById("IconGreen#id#")?.classList.add('hidden#id#')
             }
           }
           // SOLAR
@@ -1739,9 +1747,9 @@
             document.getElementById("totalBatteryOutValue#id#").innerHTML = totalBatteryOut#id#.value + '' + totalBatteryOut#id#.unit
             if (HideIfEmpty#id#){
               if (totalBatteryIn#id#.value > 0) document.getElementById("IconBatteryIn#id#")?.classList.remove('hidden#id#')
-              else document.getElementById("IconBatteryIn#id#")?.classList.add('hidden#id#');
+              else document.getElementById("IconBatteryIn#id#")?.classList.add('hidden#id#')
               if (totalBatteryOut#id#.value > 0) document.getElementById("IconBatteryOut#id#")?.classList.remove('hidden#id#')
-              else document.getElementById("IconBatteryOut#id#")?.classList.add('hidden#id#');
+              else document.getElementById("IconBatteryOut#id#")?.classList.add('hidden#id#')
             }
           }
           // HOME
@@ -1774,27 +1782,27 @@
           if (hasGrid#id# && hasBattery#id#) {
             if(batteryFromGrid > 0)
             {
-              document.getElementById("battery-grid#id#")?.classList.remove('battery-to-grid#id#');
-              document.getElementById("battery-grid#id#")?.classList.add("battery-from-grid#id#");
-              document.getElementById("AnimBatteryFromGrid#id#")?.setAttribute("dur",newDur.batteryGrid);
-              document.getElementById("CircleBatteryFromGrid#id#")?.classList.remove("hidden#id#");
-              document.getElementById("battery-grid#id#")?.classList.remove("hidden#id#");
+              document.getElementById("battery-grid#id#")?.classList.remove('battery-to-grid#id#')
+              document.getElementById("battery-grid#id#")?.classList.add("battery-from-grid#id#")
+              document.getElementById("AnimBatteryFromGrid#id#")?.setAttribute("dur",newDur.batteryGrid)
+              document.getElementById("CircleBatteryFromGrid#id#")?.classList.remove("hidden#id#")
+              document.getElementById("battery-grid#id#")?.classList.remove("hidden#id#")
             }
             else {
-              document.getElementById("CircleBatteryFromGrid#id#")?.classList.add("hidden#id#");
+              document.getElementById("CircleBatteryFromGrid#id#")?.classList.add("hidden#id#")
             }
             if (batteryToGrid > 0)
             {
-              document.getElementById("battery-grid#id#")?.classList.remove('battery-from-grid#id#');
-              document.getElementById("battery-grid#id#")?.classList.add("battery-to-grid#id#");
-              document.getElementById("AnimBatteryToGrid#id#")?.setAttribute("dur",newDur.batteryGrid);
-              document.getElementById("CircleBatteryToGrid#id#")?.classList.remove("hidden#id#");
-              document.getElementById("battery-grid#id#")?.classList.remove("hidden#id#");
+              document.getElementById("battery-grid#id#")?.classList.remove('battery-from-grid#id#')
+              document.getElementById("battery-grid#id#")?.classList.add("battery-to-grid#id#")
+              document.getElementById("AnimBatteryToGrid#id#")?.setAttribute("dur",newDur.batteryGrid)
+              document.getElementById("CircleBatteryToGrid#id#")?.classList.remove("hidden#id#")
+              document.getElementById("battery-grid#id#")?.classList.remove("hidden#id#")
             }
             else {
-              document.getElementById("CircleBatteryToGrid#id#")?.classList.add("hidden#id#");
+              document.getElementById("CircleBatteryToGrid#id#")?.classList.add("hidden#id#")
             }
-            if ((!batteryFromGrid || batteryFromGrid == 0) && batteryToGrid == 0) document.getElementById("battery-grid#id#")?.classList.add("hidden#id#");
+            if ((!batteryFromGrid || batteryFromGrid == 0) && batteryToGrid == 0) document.getElementById("battery-grid#id#")?.classList.add("hidden#id#")
           }
           
           if (hasSolarProduction#id#) {
@@ -1830,8 +1838,8 @@
           if (homeSolarCircumference !== undefined){
             let strokedasharraySolar = (homeSolarCircumference + " " + (CIRCLE_CIRCUMFERENCE#id# - homeSolarCircumference))
             let strokedashoffsetSolar = -(CIRCLE_CIRCUMFERENCE#id# - homeSolarCircumference)
-            document.getElementById("circle_solar#id#").setAttribute("stroke-dasharray",strokedasharraySolar);
-            document.getElementById("circle_solar#id#").setAttribute("stroke-dashoffset",strokedashoffsetSolar);
+            document.getElementById("circle_solar#id#").setAttribute("stroke-dasharray",strokedasharraySolar)
+            document.getElementById("circle_solar#id#").setAttribute("stroke-dashoffset",strokedashoffsetSolar)
           }
           if (homeBatteryCircumference !== undefined){
             let strokedasharrayBattery = (homeBatteryCircumference + ' ' + (CIRCLE_CIRCUMFERENCE#id# - homeBatteryCircumference))
@@ -1840,7 +1848,8 @@
             document.getElementById("circle_battery#id#").setAttribute("stroke-dashoffset",strokedashoffsetBattery)
           }
           if(homeGridCircumference !== undefined) {
-            let strokedasharrayGrid = (CIRCLE_CIRCUMFERENCE#id# - (homeSolarCircumference || 0) - (homeBatteryCircumference || 0)) + ' ' + (CIRCLE_CIRCUMFERENCE#id# - homeGridCircumference)
+            let strokedasharrayGrid = (homeGridCircumference > 0) ? (CIRCLE_CIRCUMFERENCE#id# - (homeSolarCircumference || 0) - (homeBatteryCircumference || 0)) : 0
+            strokedasharrayGrid += ' ' + (CIRCLE_CIRCUMFERENCE#id# - homeGridCircumference)    
             document.getElementById("circle_grid#id#").setAttribute("stroke-dasharray",strokedasharrayGrid)
           }
         }
