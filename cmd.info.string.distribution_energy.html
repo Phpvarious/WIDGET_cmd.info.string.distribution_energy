@@ -83,9 +83,11 @@
     
     ////////////////////////// Solar /////////////////////////
     var solarIcon#id# = null
+    var solarName#id# = "Solaire"
     var solarDec#id# = 1000
     var solarRound#id# = false
     if (is_numeric('#SolarDec#') && '#SolarDec#' >= 0) solarDec#id# = 1 + '' + "0".repeat('#SolarDec#')
+    if ('#SolarRename#' != '#'+'SolarRename#') solarName#id# = '#SolarRename#'
     if ('#SolarIcon#' != '#'+'SolarIcon#') solarIcon#id# = '#SolarIcon#'
     if ('#SolarColor#' != '#'+'SolarColor#') document.documentElement.style.setProperty('--solar-color#id#', '#SolarColor#')
     if (is_numeric('#SolarRound#') && '#SolarRound#' >= 0) solarRound#id# = '#SolarRound#'
@@ -1221,7 +1223,7 @@ if (!batteryFromGrid) if (debug#id#) console.log('| | !batteryFromGrid')
                   if (hasSolarProduction#id#) {
                     html += '<!-- (hasSolarProduction) -->'
                       html += '<div class="circle-container#id# solar#id#">'
-                        html += '<span class="label#id#">{{Solaire}}</span>'
+                        html += '<span class="label#id#">' + solarName#id# + '</span>'
                         html += '<div class="circle#id#">'
                           if (solarIcon#id# === null) {
                             html += '<svg preserveAspectRatio="xMidYMid meet" focusable="false" role="img" aria-hidden="true" viewBox="0 0 24 24" class="svg-icon#id#">'
@@ -1890,6 +1892,7 @@ if (!batteryFromGrid) if (debug#id#) console.log('| | !batteryFromGrid')
     <div> ------------ Solar ------------</div>
     <div>Solar : ID de l'équipement Solaire</div>
     <div>-- SolarInverted : Inverse les valeurs de l'équipement Solar [1: inversé | 0: défaut]</div>
+    <div>SolarRename : Si vous voulez personnaliser le nom de la tuile. (Ex: Eolienne ...)</div>
     <div>SolarRound : Arrondir la valeur [ Exemple : 1 | défaut : pas d'arrondi ]</div>
     <div>SolarDec : Nombre de chiffres a affichées après la virgule [ Exemple : 1 | défaut : 3 ]</div>
     <div>SolarIcon : Icone à afficher [ Ex : icon jeedom-lumiere-on | 0 : Auncune Icone] </div>
