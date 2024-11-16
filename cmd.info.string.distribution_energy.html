@@ -1,13 +1,13 @@
 <div class="cmd #history# tooltips cmd-widget" data-type="info" data-subtype="string" data-cmd_id="#id#" data-cmd_uid="#uid#" data-version="#version#" data-eqLogic_id="#eqLogic_id#" style="width: 100%;">  
   <!-- Widget name : cmd.info.string.distribution_energy
     Auteur        : Phpvarious
-    Version actuelle : 25/01/2024 07h15
+    Version actuelle : 16/11/2024 11h50
     Lien          : https://phpvarious.github.io/documentation/widget/fr_FR/widget_scenario/distribution_energie/
   -->  
   <div class="widget#id#" id="widget#id#"></div>
   
   <script>
-    var version#id# = '25/01/2024 07h15'
+    var version#id# = '16/11/2024 11h50'
     var debug#id# = ('#debug#' == 1) ? true : false
     var fullJs#id# = false
     var jeedomVersion#id# = 4.4
@@ -392,6 +392,7 @@
     var gridInverted#id# = false
     var hasReturnToGrid#id# = false
     var powerFailure#id# = false
+    var powerFailureInverted#id# = false
     var totalFromGridNoUnit#id# = 0
     var totalFromGrid#id# = 0
     var returnedToGridNoUnit#id# = null
@@ -602,14 +603,31 @@
          },
          success: function (powerFailure) {
            if (typeof powerFailure === "number") {
-             if (powerFailure >= 1) powerFailure#id# = true
+             if('#PowerFailureInverted#' != '#'+'PowerFailureInverted#' && '#PowerFailureInverted#' == 1){
+               powerFailureInverted#id# = true
+               if (debug#id#) console.log('| | powerFailureInverted -> true')
+             }
+             
+             if (powerFailureInverted#id#) {
+               if (powerFailure >= 1) powerFailure#id# = false
+               else powerFailure#id# = true
+             } else {
+               if (powerFailure >= 1) powerFailure#id# = true
+             }
+             
              jeedom.cmd.addUpdateFunction('#PowerFailure#', function(_options) {
                if (_options.value != undefined) 
                {
-                 if (_options.value >= 1) document.getElementById("powerFailure#id#")?.classList.add("blink#id#")
-                 else document.getElementById("powerFailure#id#")?.classList.remove("blink#id#")
+                 if (powerFailureInverted#id#) {
+                   if (_options.value >= 1) document.getElementById("powerFailure#id#")?.classList.remove("blink#id#")
+                   else powerFailure#id# = document.getElementById("powerFailure#id#")?.classList.add("blink#id#")
+                 } else {
+                   if (_options.value >= 1 >= 1) document.getElementById("powerFailure#id#")?.classList.add("blink#id#")
+                   else document.getElementById("powerFailure#id#")?.classList.remove("blink#id#")
+                 }
                }
              })
+             
              if (debug#id#) console.log('| | powerFailure  = ' + powerFailure)
            }
          }
@@ -1885,6 +1903,7 @@ if (!batteryFromGrid) if (debug#id#) console.log('| | !batteryFromGrid')
     <div>GridConsumptionColor : Couleur des éléments de catégorie réseau [ Exemple : #fffff, white]</div>
     <div>GridReturnColor : Couleur des "lignes" pour le retour au réseau [ Exemple : #fffff, white]</div>
     <div>PowerFailure : ID de l'équipement pour la coupure secteur.</div>
+    <div>-- PowerFailureInverted : Inverse les valeurs de l'équipement PowerFailure [1: inversé | 0: défaut]</div>
     <div>PowerFailureColor : Couleur de clignotement si perte secteur.</div>
     
     <div> ------------ Solar ------------</div>
